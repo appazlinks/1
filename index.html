@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>azlinks</title>
+    <!-- Favicon Moderno -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%232563eb'/><path d='M30 50l20-20v15h20v10H50v15z' fill='%23ffffff'/><circle cx='70' cy='70' r='8' fill='%2360a5fa'/></svg>">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="azlinks-192x192.png">
@@ -61,6 +62,7 @@
 </head>
 <body class="flex flex-col h-[100dvh] min-h-[100dvh] font-sans overflow-hidden text-slate-800">
 
+    <!-- Barra Superior -->
     <header class="bg-white/90 backdrop-blur-md border-b border-gray-200 p-3 flex flex-col items-start md:items-stretch gap-3 shadow-sm z-20 shrink-0">
         <div class="flex items-center justify-between w-full">
             <div class="flex items-center gap-2">
@@ -74,30 +76,104 @@
                 </div>
             </div>
 
+            <!-- Botões Desktop -->
             <div class="hidden md:flex items-center gap-2 shrink-0">
-                <button onclick="syncFromGoogleSheets()" title="Sincronizar com Google Sheets" class="px-2.5 py-1.5 text-xs rounded bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center gap-1.5 font-medium">
+                <button onclick="syncFromGoogleSheets()" title="Atualizar da Planilha" class="px-2.5 py-1.5 text-xs rounded bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center gap-1.5 font-medium">
                     <i class="fa-solid fa-file-excel text-emerald-600"></i>
-                    <span>Atualizar da Planilha</span>
+                    <span>Sincronizar Google</span>
                 </button>
+
+                <!-- Menu Links / Backup Desktop -->
+                <div class="relative">
+                    <button onclick="toggleDropdown('backupDropdownDesk')" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-database text-blue-600"></i> 
+                        <span>Links</span>
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </button>
+                    <div id="backupDropdownDesk" class="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1">
+                        <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-download text-gray-400"></i> Exportar</button>
+                        <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-upload text-gray-400"></i> Importar</button>
+                        <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-trash text-red-500"></i> Remover Todos</button>
+                    </div>
+                </div>
+
+                <!-- Menu Visualização Desktop -->
+                <div class="relative">
+                    <button onclick="toggleDropdown('viewDropdownDesk')" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-eye text-blue-600"></i> 
+                        <span>Visualização</span>
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </button>
+                    <div id="viewDropdownDesk" class="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1">
+                        <button onclick="setViewMode('grid'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-border-all text-gray-400"></i> Grade</button>
+                        <button onclick="setViewMode('list'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-list text-gray-400"></i> Lista</button>
+                    </div>
+                </div>
+
+                <button onclick="window.location.reload()" class="p-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all"><i class="fa-solid fa-rotate-right"></i></button>
+
                 <button onclick="openModal()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-sm font-medium shadow-sm transition-all">
                     <i class="fa-solid fa-plus"></i> <span>Novo</span>
                 </button>
             </div>
         </div>
 
-        <div class="flex md:hidden items-center justify-between gap-1.5 w-full overflow-x-auto pb-1">
-            <button onclick="openModal()" class="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium shadow-sm transition-all shrink-0">
-                <i class="fa-solid fa-plus"></i> <span>Novo</span>
-            </button>
-            <button onclick="syncFromGoogleSheets()" class="p-1.5 text-xs rounded bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center gap-1 shrink-0">
-                <i class="fa-solid fa-file-excel text-emerald-600"></i>
-                <span class="text-[11px]">Atualizar</span>
-            </button>
-            <button onclick="window.location.reload()" class="p-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 transition-all flex items-center justify-center shrink-0">
-                <i class="fa-solid fa-rotate-right"></i>
-            </button>
+        <!-- Barra de Pesquisa Desktop e Menu Hambúrguer -->
+        <div class="flex items-center justify-between w-full gap-2">
+            <div class="hidden md:flex items-center gap-2 flex-1">
+                <button onclick="toggleMobileSidebar()" title="Menu" class="p-2 text-gray-600 hover:text-blue-600 focus:outline-none rounded-md hover:bg-gray-100 transition-colors shrink-0">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div class="relative w-full">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" id="searchInputDesktop" placeholder="Pesquisar atalhos..." 
+                           class="w-full pl-9 pr-8 py-1.5 bg-gray-50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all search-input">
+                    <button onclick="clearSearch()" class="clear-search-btn absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden text-sm"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <!-- Botões Mobile -->
+            <div class="flex md:hidden items-center justify-between gap-1 w-full overflow-x-auto pb-1">
+                <button onclick="openModal()" class="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1.5 rounded-md text-xs font-medium shrink-0"><i class="fa-solid fa-plus"></i> Novo</button>
+                <button onclick="syncFromGoogleSheets()" class="p-1.5 text-xs rounded bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-1 shrink-0"><i class="fa-solid fa-file-excel text-emerald-600"></i> Google</button>
+                
+                <!-- Menu Links / Backup Mobile -->
+                <div class="relative shrink-0">
+                    <button onclick="toggleDropdown('backupDropdownMob')" class="px-2 py-1.5 text-xs rounded bg-gray-100 border text-gray-700 flex items-center gap-1 font-medium"><i class="fa-solid fa-database text-blue-600"></i> Links <i class="fa-solid fa-chevron-down text-[10px]"></i></button>
+                    <div id="backupDropdownMob" class="absolute left-0 mt-1 w-40 bg-white border rounded-md shadow-lg hidden z-30 py-1">
+                        <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-download"></i> Exportar</button>
+                        <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-upload"></i> Importar</button>
+                        <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100"><i class="fa-solid fa-trash"></i> Remover Todos</button>
+                    </div>
+                </div>
+
+                <!-- Menu Visualização Mobile -->
+                <div class="relative shrink-0">
+                    <button onclick="toggleDropdown('viewDropdownMob')" class="px-2 py-1.5 text-xs rounded bg-gray-100 border text-gray-700 flex items-center gap-1 font-medium"><i class="fa-solid fa-eye text-blue-600"></i> Visualização <i class="fa-solid fa-chevron-down text-[10px]"></i></button>
+                    <div id="viewDropdownMob" class="absolute left-0 mt-1 w-36 bg-white border rounded-md shadow-lg hidden z-30 py-1">
+                        <button onclick="setViewMode('grid'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-border-all"></i> Grade</button>
+                        <button onclick="setViewMode('list'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-list"></i> Lista</button>
+                    </div>
+                </div>
+
+                <button onclick="window.location.reload()" class="p-1.5 text-xs rounded bg-gray-100 border text-gray-700 shrink-0"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
         </div>
 
+        <!-- Barra de Pesquisa Mobile e Menu Hambúrguer -->
+        <div class="flex md:hidden items-center gap-2 w-full">
+            <button onclick="toggleMobileSidebar()" title="Menu" class="p-2 text-gray-600 hover:text-blue-600 focus:outline-none rounded-md hover:bg-gray-100 transition-colors shrink-0">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <div class="relative flex-1">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="searchInputMobile" placeholder="Pesquisar atalhos..." 
+                       class="w-full pl-9 pr-8 py-1.5 bg-gray-50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all search-input">
+                <button onclick="clearSearch()" class="clear-search-btn absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden text-sm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+
+        <!-- Cabeçalho da Categoria -->
         <div class="flex items-center justify-between bg-white px-4 py-2 rounded-lg border border-gray-200/80 shadow-sm w-full">
             <h2 id="currentCategoryTitle" class="font-semibold text-gray-800 text-xs md:text-base flex items-center gap-2">
                 <i class="fa-solid fa-folder-open text-blue-600"></i> Todos os Atalhos
@@ -112,16 +188,29 @@
     </header>
 
     <div class="flex-1 flex overflow-hidden relative">
-        <aside id="sidebar" class="fixed inset-y-0 left-0 -translate-x-full md:translate-x-0 md:relative bg-gray-50/95 backdrop-blur-md border-r border-gray-200 p-3 flex flex-col justify-between transition-all duration-300 w-64 md:w-16 z-40 md:z-30">
+        <!-- Sidebar / Menu Lateral -->
+        <aside id="sidebar" onmouseenter="expandSidebar()" onmouseleave="collapseSidebar()" 
+               class="fixed inset-y-0 left-0 -translate-x-full md:translate-x-0 md:relative bg-gray-50/95 backdrop-blur-md border-r border-gray-200 p-3 flex flex-col justify-between transition-all duration-300 w-64 md:w-16 z-40 md:z-30 shadow-lg md:shadow-none">
             <div class="flex flex-col gap-1 w-full category-scroll pb-10 md:pb-0">
+                <div class="flex items-center justify-between mb-2 px-1 border-b border-gray-200/60 pb-2 md:hidden">
+                    <div id="sidebarTitle" class="text-xs font-bold text-gray-500 uppercase tracking-wider truncate">FILTROS</div>
+                    <button onclick="toggleMobileSidebar()" class="text-gray-500 hover:text-gray-800 md:hidden p-1"><i class="fa-solid fa-xmark text-base"></i></button>
+                </div>
                 <div id="categoryList" class="flex flex-col gap-1 mt-1"></div>
             </div>
         </aside>
+
         <div id="sidebarOverlay" onclick="collapseSidebar()" class="fixed inset-0 bg-black/40 z-30 hidden"></div>
 
         <main class="flex-1 flex flex-col p-3 md:p-4 overflow-y-auto safe-bottom-padding gap-4">
             <div id="shortcutsGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 gap-3"></div>
-            <div id="shortcutsList" class="hidden flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm"></div>
+            <div id="shortcutsList" class="hidden flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm overflow-visible"></div>
+            
+            <div id="unregisteredNotice" class="hidden w-full border-2 border-red-500 rounded-lg p-6 flex flex-col items-center justify-center bg-white/50 my-4 text-center gap-2">
+                <span class="text-red-500 font-semibold text-xl tracking-wide">Cópia não Registrada!</span>
+                <span class="text-gray-700 font-medium text-sm">Entrar em contato com o desenvolvedor pelo whatsapp: 8298734-0685</span>
+            </div>
+
             <div id="emptyState" class="hidden flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-400">
                 <i class="fa-regular fa-folder-open text-5xl mb-3 text-gray-300"></i>
                 <p class="text-base font-medium">Nenhum atalho encontrado</p>
@@ -129,25 +218,73 @@
         </main>
     </div>
 
+    <!-- Rodapé Fixo -->
     <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2.5 flex items-center justify-between text-xs text-gray-500 z-40 shadow-md md:relative">
-        <div class="flex items-center gap-2 truncate w-full justify-center md:justify-start">
+        <div onclick="openPasswordModal()" class="flex items-center gap-2 truncate cursor-pointer hover:text-blue-600 transition-colors w-full justify-center md:justify-start">
             <i class="fa-solid fa-shield-halved text-blue-600 shrink-0"></i>
             <span class="truncate">Licenciado para: <strong id="footerLicenseName" class="text-gray-700">Sebastião Torquato</strong></span>
         </div>
     </footer>
 
+    <input type="file" id="localFileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+    <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="handleImportBackup(event)">
+
+    <!-- Modal Novo Atalho -->
+    <div id="shortcutModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2"><i class="fa-solid fa-file-code text-blue-600"></i> Adicionar Atalho</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleFormSubmit(event)" class="p-5 flex flex-col gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Título do Atalho *</label>
+                    <input type="text" id="shortcutTitle" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link ou URL *</label>
+                    <input type="text" id="fileName" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Categoria *</label>
+                    <input type="text" id="shortcutCategory" list="categorySuggestions" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="categorySuggestions"></datalist>
+                </div>
+                <div class="flex items-center gap-2 py-1">
+                    <input type="checkbox" id="shortcutFavorite" class="w-4 h-4 text-amber-500 rounded border-gray-300">
+                    <label for="shortcutFavorite" class="text-xs font-semibold text-gray-700 cursor-pointer flex items-center gap-1.5"><i class="fa-solid fa-star text-amber-400"></i> Favoritos</label>
+                </div>
+                <div class="flex items-center justify-end gap-2 mt-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const APPS_SCRIPT_URL = 'SUA_URL_DO_APPS_SCRIPT_AQUI';
 
-        let htmlFiles = JSON.parse(localStorage.getItem('local_html_shortcuts')) || [];
+        function generateUniqueId() {
+            return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        const defaultHtmlFiles = [
+            { id: generateUniqueId(), title: 'g1', name: 'g1', file: 'https://g1.globo.com/', category: 'Notícias', customIcon: '', visitCount: 0, isFavorite: false },
+            { id: generateUniqueId(), title: 'Gemini', name: 'Gemini', file: 'https://gemini.google.com/app', category: 'IA', customIcon: '', visitCount: 0, isFavorite: true },
+            { id: generateUniqueId(), title: 'Youtube', name: 'Youtube', file: 'https://www.youtube.com', category: 'Canais', customIcon: '', visitCount: 0, isFavorite: true }
+        ];
+
+        let htmlFiles = JSON.parse(localStorage.getItem('local_html_shortcuts')) || defaultHtmlFiles;
         let categoryCustomizations = JSON.parse(localStorage.getItem('local_category_customizations')) || {};
         let licensedTo = localStorage.getItem('local_app_license') || 'Sebastião Torquato';
         let currentCategory = 'all';
+        let searchQuery = '';
         let categoryViewModes = JSON.parse(localStorage.getItem('local_category_view_modes')) || {};
         let sidebarOpen = false;
 
         async function syncToGoogleSheets() {
-            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'SUA_URL_DO_APPS_SCRIPT_AQUI') return;
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'Shttps://script.google.com/macros/s/AKfycbyNRHauds83by09v_Dq5wYROW87ycWqqf1mn48VeRi7MXCHyh0g4v6VtnEULq8_jpA/exec') return;
             const indicator = document.getElementById('syncIndicator');
             if (indicator) indicator.classList.remove('hidden');
             try {
@@ -164,15 +301,14 @@
             }
         }
 
-        // Função responsável por buscar os dados atualizados diretamente da planilha ao abrir o app
         async function syncFromGoogleSheets() {
-            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyNRHauds83by09v_Dq5wYROW87ycWqqf1mn48VeRi7MXCHyh0g4v6VtnEULq8_jpA/exec') return;
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'SUA_URL_DO_APPS_SCRIPT_AQUI') return;
             const indicator = document.getElementById('syncIndicator');
             if (indicator) indicator.classList.remove('hidden');
             try {
                 const res = await fetch(APPS_SCRIPT_URL);
                 const data = await res.json();
-                if (data.status === "success" && Array.isArray(data.shortcuts)) {
+                if (data.status === "success" && Array.isArray(data.shortcuts) && data.shortcuts.length > 0) {
                     htmlFiles = data.shortcuts;
                     localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
                     render();
@@ -200,45 +336,248 @@
             window.open(url, '_blank');
         }
 
+        // Configuração da Pesquisa
+        const searchInputs = document.querySelectorAll('.search-input');
+        const clearBtns = document.querySelectorAll('.clear-search-btn');
+        
+        searchInputs.forEach(input => {
+            input.addEventListener('input', e => {
+                searchQuery = e.target.value.toLowerCase();
+                searchInputs.forEach(inp => inp.value = e.target.value);
+                clearBtns.forEach(btn => btn.classList.toggle('hidden', searchQuery.length === 0));
+                renderGrid();
+            });
+        });
+
+        function clearSearch() { 
+            searchQuery = ''; 
+            searchInputs.forEach(inp => inp.value = '');
+            clearBtns.forEach(btn => btn.classList.add('hidden')); 
+            renderGrid(); 
+        }
+
+        function toggleMobileSidebar() { 
+            sidebarOpen = !sidebarOpen; 
+            applySidebarState(); 
+        }
+
+        function expandSidebar() { if(window.innerWidth >= 768) { sidebarOpen = true; applySidebarState(); } }
+        function collapseSidebar() { sidebarOpen = false; applySidebarState(); }
+
+        function applySidebarState() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const textElements = document.querySelectorAll('.sidebar-text');
+
+            if (window.innerWidth >= 768) {
+                if (sidebarOpen) {
+                    sidebar.classList.replace('md:w-16', 'md:w-64');
+                    textElements.forEach(el => el.classList.remove('md:hidden'));
+                } else {
+                    sidebar.classList.replace('md:w-64', 'md:w-16');
+                    textElements.forEach(el => el.classList.add('md:hidden'));
+                }
+                overlay.classList.add('hidden');
+            } else {
+                if (sidebarOpen) {
+                    sidebar.classList.replace('-translate-x-full', 'translate-x-0');
+                    overlay.classList.remove('hidden');
+                } else {
+                    sidebar.classList.replace('translate-x-0', '-translate-x-full');
+                    overlay.classList.add('hidden');
+                }
+            }
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            renderGrid();
+            if (window.innerWidth < 768) collapseSidebar();
+        }
+
+        function setViewMode(mode) {
+            categoryViewModes[currentCategory] = mode;
+            saveToStorage(false);
+            renderGrid();
+        }
+
+        function getViewMode(cat) {
+            return categoryViewModes[cat] || 'grid';
+        }
+
+        function toggleDropdown(id) {
+            const el = document.getElementById(id);
+            const isHidden = el.classList.contains('hidden');
+            closeAllDropdowns();
+            if (isHidden) el.classList.remove('hidden');
+        }
+
+        function closeAllDropdowns() {
+            ['backupDropdownDesk', 'viewDropdownDesk', 'backupDropdownMob', 'viewDropdownMob'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+        }
+
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('button')) {
+                closeAllDropdowns();
+            }
+        });
+
         function renderCategories() {
             const categoryList = document.getElementById('categoryList');
             if (!categoryList) return;
             categoryList.innerHTML = '';
             
-            const btn = document.createElement('button');
-            btn.className = 'cat-btn flex items-center justify-between px-3 py-2 rounded-md text-sm w-full bg-blue-50 text-blue-700 font-medium';
-            btn.innerHTML = `<span class="flex items-center gap-2"><i class="fa-solid fa-border-all text-blue-600"></i> Todos</span><span>${htmlFiles.length}</span>`;
-            categoryList.appendChild(btn);
+            const uniqueCategories = new Set(htmlFiles.map(s => (s.category || 'Geral').trim()));
+
+            const createCatBtn = (label, icon, count, catVal) => {
+                const btn = document.createElement('button');
+                btn.onclick = () => filterCategory(catVal);
+                btn.className = `cat-btn flex items-center justify-between px-3 py-2 rounded-md text-sm w-full ${currentCategory === catVal ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`;
+                btn.innerHTML = `
+                    <span class="flex items-center gap-2 truncate">
+                        ${icon}
+                        <span class="sidebar-text md:hidden truncate">${label}</span>
+                    </span>
+                    <span class="sidebar-text md:hidden text-xs bg-gray-200/70 px-2 py-0.5 rounded-full">${count}</span>
+                `;
+                return btn;
+            };
+
+            categoryList.appendChild(createCatBtn('Favoritos', '<i class="fa-solid fa-star text-amber-400"></i>', htmlFiles.filter(s => !!s.isFavorite).length, 'favorites'));
+            categoryList.appendChild(createCatBtn('Mais Visitados', '<i class="fa-solid fa-fire text-amber-500"></i>', htmlFiles.filter(s => (s.visitCount || 0) > 0).length, 'most_visited'));
+            categoryList.appendChild(createCatBtn('Todos', '<i class="fa-solid fa-border-all text-blue-600"></i>', htmlFiles.length, 'all'));
+
+            Array.from(uniqueCategories).sort().forEach(cat => {
+                const count = htmlFiles.filter(s => (s.category || 'Geral').trim() === cat).length;
+                categoryList.appendChild(createCatBtn(cat, '<i class="fa-solid fa-folder text-blue-500"></i>', count, cat));
+            });
         }
 
         function renderGrid() {
             const grid = document.getElementById('shortcutsGrid');
+            const list = document.getElementById('shortcutsList');
             const empty = document.getElementById('emptyState');
+            const viewMode = getViewMode(currentCategory);
             if (!grid) return;
 
-            document.getElementById('currentCategoryCount').textContent = `${htmlFiles.length} itens`;
+            let filtered = htmlFiles;
+            if (searchQuery.length > 0) {
+                filtered = htmlFiles.filter(s => (s.title && s.title.toLowerCase().includes(searchQuery)));
+            } else {
+                if (currentCategory === 'favorites') filtered = htmlFiles.filter(s => !!s.isFavorite);
+                else if (currentCategory === 'most_visited') filtered = htmlFiles.filter(s => (s.visitCount || 0) > 0);
+                else if (currentCategory !== 'all') filtered = htmlFiles.filter(s => (s.category || 'Geral').trim() === currentCategory);
+            }
 
-            if (htmlFiles.length === 0) {
+            document.getElementById('currentCategoryCount').textContent = `${filtered.length} itens`;
+
+            if (filtered.length === 0) {
                 grid.classList.add('hidden');
+                list.classList.add('hidden');
                 empty.classList.remove('hidden');
                 return;
             }
             empty.classList.add('hidden');
-            grid.classList.remove('hidden');
 
-            grid.innerHTML = htmlFiles.map((item) => {
-                const targetUrl = item.file || item.name;
-                const iconUrl = item.customIcon || `https://www.google.com/s2/favicons?domain=${new URL(targetUrl).hostname}&sz=128`;
-                return `
-                    <div class="group relative flex flex-col items-center justify-center p-3 rounded-lg cursor-pointer text-center bg-white border border-gray-200/80 hover:border-blue-300 hover:shadow-sm"
-                         onclick="openShortcut('${targetUrl}', '${item.id}')">
-                        <div class="w-10 h-10 mb-2 flex items-center justify-center">
-                            <img src="${iconUrl}" class="w-8 h-8 object-contain" onerror="this.src='https://via.placeholder.com/32'">
+            if (viewMode === 'grid') {
+                list.classList.add('hidden');
+                grid.classList.remove('hidden');
+                grid.innerHTML = filtered.map((item) => {
+                    const targetUrl = item.file || item.name;
+                    const iconUrl = item.customIcon || `https://www.google.com/s2/favicons?domain=${new URL(targetUrl).hostname}&sz=128`;
+                    return `
+                        <div class="group relative flex flex-col items-center justify-center p-3 rounded-lg cursor-pointer text-center bg-white border border-gray-200/80 hover:border-blue-300 hover:shadow-sm"
+                             onclick="openShortcut('${targetUrl}', '${item.id}')">
+                            <div class="w-10 h-10 mb-2 flex items-center justify-center">
+                                <img src="${iconUrl}" class="w-8 h-8 object-contain" onerror="this.src='https://via.placeholder.com/32'">
+                            </div>
+                            <span class="text-xs text-gray-700 line-clamp-2 w-full font-medium">${item.title || item.name}</span>
                         </div>
-                        <span class="text-xs text-gray-700 line-clamp-2 w-full font-medium">${item.title || item.name}</span>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            } else {
+                grid.classList.add('hidden');
+                list.classList.remove('hidden');
+                list.innerHTML = filtered.map((item) => {
+                    const targetUrl = item.file || item.name;
+                    const iconUrl = item.customIcon || `https://www.google.com/s2/favicons?domain=${new URL(targetUrl).hostname}&sz=128`;
+                    return `
+                        <div class="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 border-b border-gray-100 cursor-pointer transition-colors"
+                             onclick="openShortcut('${targetUrl}', '${item.id}')">
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <div class="w-7 h-7 flex items-center justify-center bg-gray-100 rounded shrink-0">
+                                    <img src="${iconUrl}" class="w-5 h-5 object-contain" onerror="this.src='https://via.placeholder.com/20'">
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-medium text-gray-800 truncate">${item.title || item.name}</p>
+                                    <p class="text-[10px] text-gray-400 truncate">${targetUrl}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function openModal() { document.getElementById('shortcutModal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('shortcutModal').classList.add('hidden'); }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const title = document.getElementById('shortcutTitle').value.trim();
+            const file = document.getElementById('fileName').value.trim();
+            const category = document.getElementById('shortcutCategory').value.trim() || 'Geral';
+            const isFav = document.getElementById('shortcutFavorite').checked;
+
+            if (!title || !file) return;
+
+            htmlFiles.push({
+                id: generateUniqueId(),
+                title, name: title, file, category, customIcon: '',
+                visitCount: 0, isFavorite: isFav
+            });
+            saveToStorage();
+            closeModal();
+            render();
+        }
+
+        function exportBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(htmlFiles, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "links_backup.json");
+            dlAnchorElem.click();
+        }
+
+        function triggerImportBackup() { document.getElementById('importFileInput').click(); }
+        
+        function handleImportBackup(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const imported = JSON.parse(evt.target.result);
+                    if (Array.isArray(imported)) {
+                        htmlFiles = imported;
+                        saveToStorage();
+                        render();
+                        alert('Backup importado com sucesso!');
+                    }
+                } catch(err) { alert('Erro ao ler arquivo.'); }
+            };
+            reader.readAsText(file);
+        }
+
+        function confirmClearAllShortcuts() {
+            if(confirm('Tem certeza que deseja apagar todos os atalhos?')) {
+                htmlFiles = [];
+                saveToStorage();
+                render();
+            }
         }
 
         function render() {
@@ -246,10 +585,9 @@
             renderGrid();
         }
 
-        // Ao abrir a página ou recarregar, busca imediatamente os dados mais recentes na planilha do Google
         window.onload = async function() {
-            render(); // Exibe o cache local inicial (para abrir instantaneamente)
-            await syncFromGoogleSheets(); // Atualiza em segundo plano com os dados mais recentes da nuvem
+            render();
+            await syncFromGoogleSheets();
         };
     </script>
 </body>
