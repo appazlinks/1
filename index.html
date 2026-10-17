@@ -253,7 +253,7 @@
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link ou URL *</label>
                     <input type="text" id="fileName" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-                <div>
+                <div id="shortcutCategoryWrapper">
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Categoria *</label>
                     <input type="text" id="shortcutCategory" list="categorySuggestions" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <datalist id="categorySuggestions"></datalist>
@@ -918,11 +918,16 @@
             const form = document.querySelector('#shortcutModal form');
             if (form) form.reset();
 
-            // Se estiver dentro de uma categoria real (não "Todos", "Favoritos" ou "Mais Visitados"),
-            // já preenche o campo Categoria com ela
+            // Dentro de uma categoria real (não "Todos", "Favoritos" ou "Mais Visitados"):
+            // o campo Categoria fica oculto e o link é gravado direto nessa categoria.
+            // Em "Todos" (ou Favoritos/Mais Visitados) o campo aparece para o usuário escolher.
             const systemCategories = ['all', 'favorites', 'most_visited'];
+            const categoryWrapper = document.getElementById('shortcutCategoryWrapper');
             if (!systemCategories.includes(currentCategory)) {
                 document.getElementById('shortcutCategory').value = currentCategory;
+                if (categoryWrapper) categoryWrapper.classList.add('hidden');
+            } else {
+                if (categoryWrapper) categoryWrapper.classList.remove('hidden');
             }
 
             document.getElementById('shortcutModal').classList.remove('hidden');
