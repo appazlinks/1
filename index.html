@@ -2,7 +2,7 @@
 <html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>azlinks</title>
     <!-- Favicon Moderno -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%232563eb'/><path d='M30 50l20-20v15h20v10H50v15z' fill='%23ffffff'/><circle cx='70' cy='70' r='8' fill='%2360a5fa'/></svg>">
@@ -31,8 +31,21 @@
         ::-webkit-scrollbar-thumb { background: #cdcdcd; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a6a6a6; }
 
+        /* Suporte a Safe Area (iPhone Notch, Dynamic Island, Home Indicator) */
+        header {
+            padding-top: max(0.75rem, env(safe-area-inset-top));
+            padding-left: max(0.75rem, env(safe-area-inset-left));
+            padding-right: max(0.75rem, env(safe-area-inset-right));
+        }
+
+        footer {
+            padding-bottom: max(0.625rem, env(safe-area-inset-bottom));
+            padding-left: max(1rem, env(safe-area-inset-left));
+            padding-right: max(1rem, env(safe-area-inset-right));
+        }
+
         .category-scroll {
-            max-height: calc(100vh - 120px);
+            max-height: calc(100dvh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
@@ -51,7 +64,7 @@
         }
     </style>
 </head>
-<body class="flex flex-col h-screen min-h-screen h-[100dvh] font-sans overflow-hidden text-slate-800">
+<body class="flex flex-col h-screen h-[100dvh] min-h-[100dvh] font-sans overflow-hidden text-slate-800">
 
     <!-- Barra Superior -->
     <header class="bg-white/90 backdrop-blur-md border-b border-gray-200 p-3 flex flex-col items-start md:items-stretch gap-3 shadow-sm z-20 shrink-0">
@@ -225,7 +238,7 @@
 
         <div id="sidebarOverlay" onclick="collapseSidebar()" class="fixed inset-0 bg-black/40 z-30 hidden"></div>
 
-        <main class="flex-1 flex flex-col p-3 md:p-4 overflow-y-auto pb-20 md:pb-6 gap-4">
+        <main class="flex-1 flex flex-col p-3 md:p-4 overflow-y-auto pb-24 md:pb-6 gap-4">
             <div id="shortcutsGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 gap-3"></div>
             <div id="shortcutsList" class="hidden flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm overflow-visible"></div>
             
@@ -547,7 +560,7 @@
 
     <script>
         // CONFIGURAÇÃO DO GOOGLE APPS SCRIPT
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNRHauds83by09v_Dq5wYROW87ycWqqf1mn48VeRi7MXCHyh0g4v6VtnEULq8_jpA/exec"; // Cole a URL gerada na implantação aqui
+        const APPS_SCRIPT_URL = "SUA_URL_DO_WEB_APP_AQUI"; // Cole a URL gerada na implantação aqui
 
         const ADMIN_PASSWORD = "Admin@123456";
 
@@ -921,65 +934,58 @@
             document.getElementById('importFileInput').click();
         }
 
-       function handleImportBackup(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+        function handleImportBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const importedData = JSON.parse(e.target.result);
-            let incoming = [];
-            if (Array.isArray(importedData)) {
-                incoming = importedData;
-            } else if (importedData && Array.isArray(importedData.shortcuts)) {
-                incoming = importedData.shortcuts;
-                if (importedData.license) {
-                    licensedTo = importedData.license;
-                    localStorage.setItem('local_app_license', licensedTo);
-                    updateLicenseDisplay();
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    let incoming = [];
+                    if (Array.isArray(importedData)) {
+                        incoming = importedData;
+                    } else if (importedData && Array.isArray(importedData.shortcuts)) {
+                        incoming = importedData.shortcuts;
+                        if (importedData.license) {
+                            licensedTo = importedData.license;
+                            localStorage.setItem('local_app_license', licensedTo);
+                            updateLicenseDisplay();
+                        }
+                        if (importedData.categories) {
+                            categoryCustomizations = {...categoryCustomizations, ...importedData.categories};
+                        }
+                        if (importedData.viewModes) {
+                            categoryViewModes = {...categoryViewModes, ...importedData.viewModes};
+                        }
+                    } else {
+                        alert('Formato inválido.');
+                        return;
+                    }
+                    
+                    let addedCount = 0;
+
+                    incoming.forEach(newItem => {
+                        htmlFiles.push({ 
+                            id: generateUniqueId(),
+                            ...newItem, 
+                            visitCount: newItem.visitCount || 0,
+                            isFavorite: newItem.isFavorite || false 
+                        });
+                        addedCount++;
+                    });
+
+                    saveToStorage(true); // Salva e sincroniza automaticamente com Google Sheets
+                    render();
+                    
+                    alert(`Backup importado com sucesso! (${addedCount} atalhos adicionados)`);
+                } catch (err) {
+                    alert('Erro ao ler o backup.');
                 }
-                if (importedData.categories) {
-                    categoryCustomizations = {...categoryCustomizations, ...importedData.categories};
-                }
-                if (importedData.viewModes) {
-                    categoryViewModes = {...categoryViewModes, ...importedData.viewModes};
-                }
-            } else {
-                alert('Formato inválido.');
-                return;
-            }
-            
-            let addedCount = 0;
-
-            incoming.forEach(newItem => {
-                htmlFiles.push({ 
-                    id: newItem.id || generateUniqueId(),
-                    ...newItem, 
-                    visitCount: newItem.visitCount || 0,
-                    isFavorite: newItem.isFavorite || false 
-                });
-                addedCount++;
-            });
-
-            // 1. Salva localmente
-            saveToStorage();
-            render();
-            
-            // 2. Envia explicitamente para a Planilha do Google
-            if (typeof syncToGoogleSheets === 'function') {
-                await syncToGoogleSheets();
-            }
-
-            alert(`Backup importado e sincronizado com o Google Sheets com sucesso! (${addedCount} atalhos adicionados)`);
-        } catch (err) {
-            console.error(err);
-            alert('Erro ao ler o backup.');
+                event.target.value = '';
+            };
+            reader.readAsText(file);
         }
-        event.target.value = '';
-    };
-    reader.readAsText(file);
-}
 
         function confirmClearAllShortcuts() {
             document.getElementById('deleteAllModal').classList.remove('hidden');
