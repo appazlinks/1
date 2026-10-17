@@ -913,7 +913,21 @@
             reader.readAsDataURL(file);
         }
 
-        function openModal() { document.getElementById('shortcutModal').classList.remove('hidden'); }
+        function openModal() {
+            // Sempre abre com os campos limpos
+            const form = document.querySelector('#shortcutModal form');
+            if (form) form.reset();
+
+            // Se estiver dentro de uma categoria real (não "Todos", "Favoritos" ou "Mais Visitados"),
+            // já preenche o campo Categoria com ela
+            const systemCategories = ['all', 'favorites', 'most_visited'];
+            if (!systemCategories.includes(currentCategory)) {
+                document.getElementById('shortcutCategory').value = currentCategory;
+            }
+
+            document.getElementById('shortcutModal').classList.remove('hidden');
+            document.getElementById('shortcutTitle').focus();
+        }
         function closeModal() { document.getElementById('shortcutModal').classList.add('hidden'); }
 
         function openEditShortcutModal(itemId) {
@@ -976,6 +990,7 @@
                 visitCount: 0, isFavorite: isFav
             });
             saveToStorage();
+            e.target.reset();
             closeModal();
             render();
         }
