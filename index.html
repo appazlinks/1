@@ -443,12 +443,38 @@
             return 'fa-solid fa-folder text-blue-500';
         }
 
-        async function syncToGoogleSheets() {
-            if (!isSyncConfigured()) return;
+        // Controle do aviso "Sincronizando...": conta quantas sincronizações estão em andamento
+        // e só esconde o aviso quando todas terminarem (com sucesso, erro ou tempo esgotado).
+        let pendingSyncCount = 0;
+
+        function beginSync() {
+            pendingSyncCount++;
             const indicator = document.getElementById('syncIndicator');
             if (indicator) indicator.classList.remove('hidden');
+        }
+
+        function endSync() {
+            pendingSyncCount = Math.max(0, pendingSyncCount - 1);
+            if (pendingSyncCount === 0) {
+                const indicator = document.getElementById('syncIndicator');
+                if (indicator) indicator.classList.add('hidden');
+            }
+        }
+
+        // fetch com limite de tempo: se a requisição travar (comum no iPhone/Safari),
+        // ela é cancelada e o aviso não fica preso na tela.
+        function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            return fetch(url, { ...options, signal: controller.signal })
+                .finally(() => clearTimeout(timer));
+        }
+
+        async function syncToGoogleSheets() {
+            if (!isSyncConfigured()) return;
+            beginSync();
             try {
-                await fetch(APPS_SCRIPT_URL, {
+                await fetchWithTimeout(APPS_SCRIPT_URL, {
                     method: "POST",
                     mode: "no-cors",
                     headers: { "Content-Type": "application/json" },
@@ -457,22 +483,21 @@
             } catch (err) {
                 console.error("Erro ao sincronizar envio:", err);
             } finally {
-                if (indicator) indicator.classList.add('hidden');
+                endSync();
             }
         }
 
         async function syncFromGoogleSheets() {
             if (!isSyncConfigured()) return;
-            const indicator = document.getElementById('syncIndicator');
             const iconDesk = document.getElementById('syncIconDesk');
             const iconMob = document.getElementById('syncIconMob');
-            
-            if (indicator) indicator.classList.remove('hidden');
+
+            beginSync();
             if (iconDesk) iconDesk.classList.add('fa-spin');
             if (iconMob) iconMob.classList.add('fa-spin');
 
             try {
-                const res = await fetch(APPS_SCRIPT_URL);
+                const res = await fetchWithTimeout(APPS_SCRIPT_URL);
                 const data = await res.json();
                 if (data.status === "success" && Array.isArray(data.shortcuts) && data.shortcuts.length > 0) {
                     htmlFiles = data.shortcuts;
@@ -482,7 +507,7 @@
             } catch (err) {
                 console.error("Erro ao puxar dados do Sheets:", err);
             } finally {
-                if (indicator) indicator.classList.add('hidden');
+                endSync();
                 if (iconDesk) iconDesk.classList.remove('fa-spin');
                 if (iconMob) iconMob.classList.remove('fa-spin');
             }
