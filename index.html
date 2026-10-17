@@ -105,7 +105,7 @@
                     </div>
                 </div>
 
-                <!-- Botão Atualizar (Executa Sincronização e Recarrega) -->
+                <!-- Botão Atualizar / Sincronizar -->
                 <button onclick="syncFromGoogleSheets()" title="Atualizar dados da planilha Google" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center">
                     <i id="syncIconDesk" class="fa-solid fa-rotate-right"></i>
                 </button>
@@ -227,7 +227,7 @@
     <input type="file" id="localFileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
     <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="handleImportBackup(event)">
 
-    <!-- Modal Novo Atalho -->
+    <!-- Modais -->
     <div id="shortcutModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
             <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
@@ -260,6 +260,56 @@
         </div>
     </div>
 
+    <!-- Modal Editar Atalho -->
+    <div id="editShortcutModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2"><i class="fa-solid fa-pen text-blue-600"></i> Editar Atalho</h3>
+                <button onclick="closeEditShortcutModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleEditFormSubmit(event)" class="p-5 flex flex-col gap-3">
+                <input type="hidden" id="editOriginalId">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Título do Atalho *</label>
+                    <input type="text" id="editShortcutTitle" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link ou URL *</label>
+                    <input type="text" id="editFileName" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Categoria *</label>
+                    <input type="text" id="editShortcutCategory" required list="categorySuggestions" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="flex items-center gap-2 py-1">
+                    <input type="checkbox" id="editShortcutFavorite" class="w-4 h-4 text-amber-500 rounded border-gray-300">
+                    <label for="editShortcutFavorite" class="text-xs font-semibold text-gray-700 cursor-pointer flex items-center gap-1.5"><i class="fa-solid fa-star text-amber-400"></i> Favoritos</label>
+                </div>
+                <div class="flex items-center justify-end gap-2 mt-2 pt-3 border-t">
+                    <button type="button" onclick="closeEditShortcutModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Remover Atalho -->
+    <div id="deleteModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Confirmar Remoção</h3>
+                <button onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+                <p id="deleteMessage" class="text-sm text-gray-600">Deseja remover este atalho?</p>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="button" id="confirmDeleteBtn" class="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md font-medium">Remover</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyNRHauds83by09v_Dq5wYROW87ycWqqf1mn48VeRi7MXCHyh0g4v6VtnEULq8_jpA/exec';
 
@@ -269,7 +319,7 @@
 
         const defaultHtmlFiles = [
             { id: generateUniqueId(), title: 'g1', name: 'g1', file: 'https://g1.globo.com/', category: 'Notícias', customIcon: '', visitCount: 0, isFavorite: false },
-            { id: generateUniqueId(), title: 'Gemini', name: 'Gemini', file: 'https://gemini.google.com/app', category: 'IA', customIcon: '', visitCount: 0, isFavorite: true },
+            { id: generateUniqueId(), title: 'Gemini', name: 'Gemini', file: 'https://gemini.google.com/app', category: 'IA', customIcon: '', visitCount: true, isFavorite: true },
             { id: generateUniqueId(), title: 'Youtube', name: 'Youtube', file: 'https://www.youtube.com', category: 'Canais', customIcon: '', visitCount: 0, isFavorite: true }
         ];
 
@@ -280,8 +330,8 @@
         let searchQuery = '';
         let categoryViewModes = JSON.parse(localStorage.getItem('local_category_view_modes')) || {};
         let sidebarOpen = false;
+        let itemToDeleteId = null;
 
-        // Tabela de mapeamento de ícones dinâmicos das categorias
         const availableCategoryIcons = [
             { icon: 'fa-solid fa-house', color: 'text-amber-500' },
             { icon: 'fa-solid fa-cart-shopping', color: 'text-emerald-500' },
@@ -376,6 +426,7 @@
 
         function saveToStorage(forceSync = true) {
             localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
+            localStorage.setItem('local_category_customizations', JSON.stringify(categoryCustomizations));
             if (forceSync) syncToGoogleSheets();
         }
 
@@ -388,6 +439,16 @@
                 }
             }
             window.open(url, '_blank');
+        }
+
+        function toggleFavorite(event, itemId) {
+            event.stopPropagation();
+            const item = htmlFiles.find(f => f.id === itemId);
+            if (item) {
+                item.isFavorite = !item.isFavorite;
+                saveToStorage();
+                render();
+            }
         }
 
         // Configuração da Pesquisa
@@ -473,7 +534,22 @@
             });
         }
 
+        function toggleActionMenu(event, menuId) {
+            event.stopPropagation();
+            const menu = document.getElementById(menuId);
+            const isHidden = menu.classList.contains('hidden');
+            closeAllActionMenus();
+            if (isHidden) menu.classList.remove('hidden');
+        }
+
+        function closeAllActionMenus() {
+            document.querySelectorAll('.action-menu-dropdown').forEach(m => m.classList.add('hidden'));
+        }
+
         window.addEventListener('click', function(e) {
+            if (!e.target.closest('.action-menu-container') && !e.target.closest('button[onclick*="toggleActionMenu"]')) {
+                closeAllActionMenus();
+            }
             if (!e.target.closest('button')) {
                 closeAllDropdowns();
             }
@@ -485,29 +561,84 @@
             categoryList.innerHTML = '';
             
             const uniqueCategories = new Set(htmlFiles.map(s => (s.category || 'Geral').trim()));
+            const totalCategories = uniqueCategories.size;
 
-            const createCatBtn = (label, iconClass, count, catVal) => {
+            const createCatBtn = (label, iconClass, count, catVal, isSystem = true, catIndex = 0) => {
                 const btn = document.createElement('button');
                 btn.onclick = () => filterCategory(catVal);
                 btn.className = `cat-btn flex items-center justify-between px-3 py-2 rounded-md text-sm w-full ${currentCategory === catVal ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`;
+                
+                let actionMenuHtml = '';
+                if (!isSystem) {
+                    const catMenuId = `actionMenuCategory_${catIndex}`;
+                    const isNearBottomCat = catIndex >= totalCategories - 2;
+                    const catMenuPositionClass = isNearBottomCat ? 'absolute right-0 bottom-full mb-1' : 'absolute right-0 top-full mt-1';
+                    
+                    actionMenuHtml = `
+                        <div class="flex items-center gap-1 shrink-0 relative action-menu-container">
+                            <span class="sidebar-text md:hidden text-xs bg-gray-200/70 text-gray-600 px-2 py-0.5 rounded-full">${count}</span>
+                            <button onclick="toggleActionMenu(event, '${catMenuId}')" title="Ações" class="sidebar-text md:hidden p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors">
+                                <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                            </button>
+                            <div id="${catMenuId}" class="action-menu-dropdown ${catMenuPositionClass} w-36 bg-white border border-gray-200 rounded-md shadow-xl hidden z-50 py-1 text-left">
+                                <button onclick="event.stopPropagation(); editCategoryPrompt('${catVal.replace(/'/g, "\\'")}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                    <i class="fa-solid fa-pen text-blue-500"></i> Editar
+                                </button>
+                                <button onclick="event.stopPropagation(); deleteCategoryPrompt('${catVal.replace(/'/g, "\\'")}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100 flex items-center gap-2">
+                                    <i class="fa-solid fa-trash text-red-500"></i> Remover
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    actionMenuHtml = `<span class="sidebar-text md:hidden text-xs bg-gray-200/70 px-2 py-0.5 rounded-full">${count}</span>`;
+                }
+
                 btn.innerHTML = `
-                    <span class="flex items-center gap-2 truncate">
-                        <i class="${iconClass}"></i>
+                    <span class="flex items-center gap-2 truncate flex-1 min-w-0">
+                        <i class="${iconClass} shrink-0"></i>
                         <span class="sidebar-text md:hidden truncate">${label}</span>
                     </span>
-                    <span class="sidebar-text md:hidden text-xs bg-gray-200/70 px-2 py-0.5 rounded-full">${count}</span>
+                    ${actionMenuHtml}
                 `;
                 return btn;
             };
 
-            categoryList.appendChild(createCatBtn('Favoritos', 'fa-solid fa-star text-amber-400', htmlFiles.filter(s => !!s.isFavorite).length, 'favorites'));
-            categoryList.appendChild(createCatBtn('Mais Visitados', 'fa-solid fa-fire text-amber-500', htmlFiles.filter(s => (s.visitCount || 0) > 0).length, 'most_visited'));
-            categoryList.appendChild(createCatBtn('Todos', 'fa-solid fa-border-all text-blue-600', htmlFiles.length, 'all'));
+            categoryList.appendChild(createCatBtn('Favoritos', 'fa-solid fa-star text-amber-400', htmlFiles.filter(s => !!s.isFavorite).length, 'favorites', true));
+            categoryList.appendChild(createCatBtn('Mais Visitados', 'fa-solid fa-fire text-amber-500', htmlFiles.filter(s => (s.visitCount || 0) > 0).length, 'most_visited', true));
+            categoryList.appendChild(createCatBtn('Todos', 'fa-solid fa-border-all text-blue-600', htmlFiles.length, 'all', true));
 
-            Array.from(uniqueCategories).sort().forEach(cat => {
+            Array.from(uniqueCategories).sort().forEach((cat, index) => {
                 const count = htmlFiles.filter(s => (s.category || 'Geral').trim() === cat).length;
-                categoryList.appendChild(createCatBtn(cat, getCategoryIcon(cat), count, cat));
+                categoryList.appendChild(createCatBtn(cat, getCategoryIcon(cat), count, cat, false, index));
             });
+        }
+
+        function editCategoryPrompt(catName) {
+            const newName = prompt("Novo nome para a categoria:", catName);
+            if (newName && newName.trim() !== "") {
+                htmlFiles.forEach(item => {
+                    if ((item.category || 'Geral').trim() === catName) {
+                        item.category = newName.trim();
+                    }
+                });
+                if (currentCategory === catName) currentCategory = newName.trim();
+                saveToStorage();
+                render();
+            }
+        }
+
+        function deleteCategoryPrompt(catName) {
+            if (confirm(`Deseja remover a categoria "${catName}"? Os atalhos serão movidos para "Geral".`)) {
+                htmlFiles.forEach(item => {
+                    if ((item.category || 'Geral').trim() === catName) {
+                        item.category = 'Geral';
+                    }
+                });
+                if (currentCategory === catName) currentCategory = 'all';
+                saveToStorage();
+                render();
+            }
         }
 
         function renderGrid() {
@@ -536,38 +667,75 @@
             }
             empty.classList.add('hidden');
 
+            const totalItems = filtered.length;
+
             if (viewMode === 'grid') {
                 list.classList.add('hidden');
                 grid.classList.remove('hidden');
-                grid.innerHTML = filtered.map((item) => {
+                grid.innerHTML = filtered.map((item, index) => {
                     const targetUrl = item.file || item.name;
                     const iconUrl = item.customIcon || `https://www.google.com/s2/favicons?domain=${new URL(targetUrl).hostname}&sz=128`;
+                    const menuId = `actionMenuGrid_${index}`;
+                    const isFav = !!item.isFavorite;
+
                     return `
                         <div class="group relative flex flex-col items-center justify-center p-3 rounded-lg cursor-pointer text-center bg-white border border-gray-200/80 hover:border-blue-300 hover:shadow-sm"
                              onclick="openShortcut('${targetUrl}', '${item.id}')">
+                            
+                            <button onclick="toggleFavorite(event, '${item.id}')" class="absolute top-1 left-1 p-1 text-gray-300 hover:text-amber-400 z-10">
+                                <i class="fa-solid fa-star text-xs ${isFav ? 'text-amber-400' : ''}"></i>
+                            </button>
+
                             <div class="w-10 h-10 mb-2 flex items-center justify-center">
                                 <img src="${iconUrl}" class="w-8 h-8 object-contain" onerror="this.src='https://via.placeholder.com/32'">
                             </div>
                             <span class="text-xs text-gray-700 line-clamp-2 w-full font-medium">${item.title || item.name}</span>
+                            
+                            <div class="absolute top-1 right-1 action-menu-container z-10">
+                                <button onclick="toggleActionMenu(event, '${menuId}')" title="Ações" class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors">
+                                    <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                                </button>
+                                <div id="${menuId}" class="action-menu-dropdown absolute top-full right-0 w-32 bg-white border rounded shadow-lg hidden z-50 py-1 text-left text-xs">
+                                    <button onclick="event.stopPropagation(); openEditShortcutModal('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1 hover:bg-gray-100 flex items-center gap-2 text-gray-700"><i class="fa-solid fa-pen text-blue-500"></i> Editar</button>
+                                    <button onclick="event.stopPropagation(); deleteItem('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1 hover:bg-gray-100 flex items-center gap-2 text-red-600"><i class="fa-solid fa-trash"></i> Remover</button>
+                                </div>
+                            </div>
                         </div>
                     `;
                 }).join('');
             } else {
                 grid.classList.add('hidden');
                 list.classList.remove('hidden');
-                list.innerHTML = filtered.map((item) => {
+                list.innerHTML = filtered.map((item, index) => {
                     const targetUrl = item.file || item.name;
                     const iconUrl = item.customIcon || `https://www.google.com/s2/favicons?domain=${new URL(targetUrl).hostname}&sz=128`;
+                    const menuId = `actionMenuList_${index}`;
+                    const isNearBottom = index >= totalItems - 2;
+                    const menuPositionClass = isNearBottom ? 'absolute right-0 bottom-full mb-1' : 'absolute right-0 top-full mt-1';
+                    const isFav = !!item.isFavorite;
+
                     return `
-                        <div class="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 border-b border-gray-100 cursor-pointer transition-colors"
+                        <div class="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 border-b border-gray-100 cursor-pointer transition-colors relative"
                              onclick="openShortcut('${targetUrl}', '${item.id}')">
                             <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <button onclick="toggleFavorite(event, '${item.id}')" class="p-1 text-gray-300 hover:text-amber-400">
+                                    <i class="fa-solid fa-star text-xs ${isFav ? 'text-amber-400' : ''}"></i>
+                                </button>
                                 <div class="w-7 h-7 flex items-center justify-center bg-gray-100 rounded shrink-0">
                                     <img src="${iconUrl}" class="w-5 h-5 object-contain" onerror="this.src='https://via.placeholder.com/20'">
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-xs font-medium text-gray-800 truncate">${item.title || item.name}</p>
                                     <p class="text-[10px] text-gray-400 truncate">${targetUrl}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0 action-menu-container">
+                                <button onclick="toggleActionMenu(event, '${menuId}')" title="Ações" class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors">
+                                    <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                                </button>
+                                <div id="${menuId}" class="action-menu-dropdown ${menuPositionClass} w-32 bg-white border rounded shadow-lg hidden z-50 py-1 text-left text-xs">
+                                    <button onclick="event.stopPropagation(); openEditShortcutModal('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1 hover:bg-gray-100 flex items-center gap-2 text-gray-700"><i class="fa-solid fa-pen text-blue-500"></i> Editar</button>
+                                    <button onclick="event.stopPropagation(); deleteItem('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1 hover:bg-gray-100 flex items-center gap-2 text-red-600"><i class="fa-solid fa-trash"></i> Remover</button>
                                 </div>
                             </div>
                         </div>
@@ -578,6 +746,51 @@
 
         function openModal() { document.getElementById('shortcutModal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('shortcutModal').classList.add('hidden'); }
+
+        function openEditShortcutModal(itemId) {
+            const item = htmlFiles.find(f => f.id === itemId);
+            if (!item) return;
+            document.getElementById('editOriginalId').value = item.id;
+            document.getElementById('editShortcutTitle').value = item.title || item.name;
+            document.getElementById('editFileName').value = item.file || item.name;
+            document.getElementById('editShortcutCategory').value = item.category || 'Geral';
+            document.getElementById('editShortcutFavorite').checked = !!item.isFavorite;
+            document.getElementById('editShortcutModal').classList.remove('hidden');
+        }
+
+        function closeEditShortcutModal() { document.getElementById('editShortcutModal').classList.add('hidden'); }
+
+        function handleEditFormSubmit(e) {
+            e.preventDefault();
+            const origId = document.getElementById('editOriginalId').value;
+            const item = htmlFiles.find(f => f.id === origId);
+            if (item) {
+                item.title = document.getElementById('editShortcutTitle').value.trim();
+                item.name = item.title;
+                item.file = document.getElementById('editFileName').value.trim();
+                item.category = document.getElementById('editShortcutCategory').value.trim() || 'Geral';
+                item.isFavorite = document.getElementById('editShortcutFavorite').checked;
+                saveToStorage();
+            }
+            closeEditShortcutModal();
+            render();
+        }
+
+        function deleteItem(itemId) {
+            const item = htmlFiles.find(f => f.id === itemId);
+            if (!item) return;
+            itemToDeleteId = itemId;
+            document.getElementById('deleteMessage').textContent = `Deseja remover o atalho "${item.title || item.name}"?`;
+            document.getElementById('confirmDeleteBtn').onclick = () => {
+                htmlFiles = htmlFiles.filter(f => f.id !== itemToDeleteId);
+                saveToStorage();
+                closeDeleteModal();
+                render();
+            };
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() { document.getElementById('deleteModal').classList.add('hidden'); }
 
         function handleFormSubmit(e) {
             e.preventDefault();
@@ -599,7 +812,12 @@
         }
 
         function exportBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(htmlFiles, null, 2));
+            const backupPayload = {
+                shortcuts: htmlFiles,
+                categories: categoryCustomizations,
+                viewModes: categoryViewModes
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
             dlAnchorElem.setAttribute("download", "links_backup.json");
@@ -615,12 +833,18 @@
             reader.onload = function(evt) {
                 try {
                     const imported = JSON.parse(evt.target.result);
-                    if (Array.isArray(imported)) {
-                        htmlFiles = imported;
-                        saveToStorage();
-                        render();
-                        alert('Backup importado com sucesso!');
-                    }
+                    let incoming = Array.isArray(imported) ? imported : (imported.shortcuts || []);
+                    incoming.forEach(newItem => {
+                        htmlFiles.push({
+                            id: generateUniqueId(),
+                            ...newItem,
+                            visitCount: newItem.visitCount || 0,
+                            isFavorite: newItem.isFavorite || false
+                        });
+                    });
+                    saveToStorage(true);
+                    render();
+                    alert('Backup importado e sincronizado com sucesso!');
                 } catch(err) { alert('Erro ao ler arquivo.'); }
             };
             reader.readAsText(file);
