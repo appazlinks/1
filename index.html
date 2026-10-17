@@ -24,7 +24,6 @@
         }
     </script>
     
-       
     <style>
         body { background-color: #f3f3f3; user-select: none; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -83,9 +82,9 @@
                         <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                             <i class="fa-solid fa-upload text-gray-400"></i> Importar
                         </button>
-                        <a href="https://azlinks.rf.gd/links.zip" target="_blank" onclick="closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
-                            <i class="fa-solid fa-file-arrow-down text-gray-400"></i> Baixar
-                        </a>
+                        <button onclick="loadFromGoogleSheets(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-green-700 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-arrows-rotate text-green-600"></i> Sincronizar Google
+                        </button>
                         <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100 flex items-center gap-2">
                             <i class="fa-solid fa-trash text-red-500"></i> Remover Todos
                         </button>
@@ -108,7 +107,6 @@
                     </div>
                 </div>
 
-                <!-- Botão Recarregar Página Desktop -->
                 <button onclick="window.location.reload()" title="Recarregar página" class="p-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center">
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
@@ -121,7 +119,6 @@
 
         <div class="flex items-center justify-between w-full gap-2">
             <div class="hidden md:flex items-center gap-2 flex-1">
-                <!-- Botão Hambúrguer Desktop -->
                 <button onclick="toggleMobileSidebar()" title="Menu" class="p-2 text-gray-600 hover:text-blue-600 focus:outline-none rounded-md hover:bg-gray-100 transition-colors shrink-0">
                     <i class="fa-solid fa-bars text-lg"></i>
                 </button>
@@ -154,9 +151,9 @@
                         <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                             <i class="fa-solid fa-upload text-gray-400"></i> Importar
                         </button>
-                        <a href="https://azlinks.rf.gd/links.zip" target="_blank" onclick="closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
-                            <i class="fa-solid fa-file-arrow-down text-gray-400"></i> Baixar
-                        </a>
+                        <button onclick="loadFromGoogleSheets(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-green-700 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-arrows-rotate text-green-600"></i> Sincronizar Google
+                        </button>
                         <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100 flex items-center gap-2">
                             <i class="fa-solid fa-trash text-red-500"></i> Remover Todos
                         </button>
@@ -179,7 +176,6 @@
                     </div>
                 </div>
 
-                <!-- Botão Recarregar Página Mobile -->
                 <button onclick="window.location.reload()" title="Recarregar página" class="p-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center">
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
@@ -187,7 +183,6 @@
         </div>
 
         <div class="flex md:hidden items-center gap-2 w-full">
-            <!-- Botão Hambúrguer Mobile -->
             <button onclick="toggleMobileSidebar()" title="Menu" class="p-2 text-gray-600 hover:text-blue-600 focus:outline-none rounded-md hover:bg-gray-100 transition-colors shrink-0">
                 <i class="fa-solid fa-bars text-lg"></i>
             </button>
@@ -201,7 +196,7 @@
             </div>
         </div>
 
-        <!-- Cabeçalho da Categoria e Quantidade de Itens -->
+        <!-- Cabeçalho da Categoria -->
         <div class="flex items-center justify-between bg-white px-4 py-2.5 rounded-lg border border-gray-200/80 shadow-sm w-full">
             <h2 id="currentCategoryTitle" class="font-semibold text-gray-800 text-sm md:text-base flex items-center gap-2">
                 <i class="fa-solid fa-folder-open text-blue-600"></i> Todos os Atalhos
@@ -213,7 +208,6 @@
     </header>
 
     <div class="flex-1 flex overflow-hidden relative">
-        <!-- Sidebar Escondida no Mobile por padrão -->
         <aside id="sidebar" onmouseenter="expandSidebar()" onmouseleave="collapseSidebar()" 
                class="fixed inset-y-0 left-0 -translate-x-full md:translate-x-0 md:relative bg-gray-50/95 backdrop-blur-md border-r border-gray-200 p-3 flex flex-col justify-between transition-all duration-300 w-64 md:w-16 z-40 md:z-30 shadow-lg md:shadow-none">
             
@@ -260,7 +254,6 @@
     <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="handleImportBackup(event)">
 
     <!-- Modais -->
-    <!-- Modal Senha -->
     <div id="passwordModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
             <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
@@ -272,7 +265,7 @@
             <form onsubmit="handlePasswordSubmit(event)" class="p-5 flex flex-col gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Senha de Administrador</label>
-                    <input type="password" id="adminPasswordInput" required placeholder="" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="password" id="adminPasswordInput" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div id="passwordErrorMsg" class="hidden items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-xs">
                     <i class="fa-solid fa-circle-exclamation shrink-0"></i>
@@ -286,7 +279,6 @@
         </div>
     </div>
 
-    <!-- Modal Licença -->
     <div id="licenseModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
             <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
@@ -298,7 +290,7 @@
             <div class="p-5 flex flex-col gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Nome da Empresa ou Pessoa *</label>
-                    <input type="text" id="licenseInput" placeholder="a" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="licenseInput" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div class="flex items-center justify-end gap-2 pt-3 border-t">
                     <button type="button" onclick="closeLicenseModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
@@ -308,7 +300,6 @@
         </div>
     </div>
 
-    <!-- Modal de Edição de Categoria -->
     <div id="editCategoryModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
             <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
@@ -325,8 +316,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Classe do Ícone (FontAwesome) *</label>
-                    <input type="text" id="editCategoryIconClass" required placeholder="Ex: fa-solid fa-folder" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <p class="text-[11px] text-gray-400 mt-1">Exemplos: <code>fa-solid fa-brain</code>, <code>fa-solid fa-code</code>, <code>fa-solid fa-shield-halved</code></p>
+                    <input type="text" id="editCategoryIconClass" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div class="flex items-center justify-end gap-2 mt-2 pt-3 border-t">
                     <button type="button" onclick="closeEditCategoryModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
@@ -336,7 +326,6 @@
         </div>
     </div>
 
-    <!-- Modal para Alterar Ícone da Categoria -->
     <div id="editCategoryIconModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
             <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
@@ -351,7 +340,7 @@
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link do Ícone / Imagem (Opcional)</label>
                     <div class="flex items-center gap-2">
                         <div class="relative flex-1">
-                            <input type="text" id="newCategoryIconClass" placeholder="" oninput="updateCategoryIconPreview()" class="w-full pl-3 pr-16 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <input type="text" id="newCategoryIconClass" oninput="updateCategoryIconPreview()" class="w-full pl-3 pr-16 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-gray-400">
                                 <button type="button" onclick="triggerFileSelect('newCategoryIconClass', 'categoryIconPreviewContainer')" title="Procurar" class="hover:text-blue-600 text-sm">
                                     <i class="fa-solid fa-folder-open"></i>
@@ -365,7 +354,6 @@
                             <i class="fa-solid fa-globe text-gray-400 text-sm" id="categoryPreviewPlaceholder"></i>
                         </div>
                     </div>
-                    <p class="text-[11px] text-gray-400 mt-1">Cole o link de uma imagem ou classe FontAwesome (ex: <code>fa-solid fa-brain text-purple-500</code>).</p>
                 </div>
                 <div class="flex items-center justify-end gap-2 pt-3 border-t">
                     <button type="button" onclick="closeEditCategoryIconModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
@@ -387,15 +375,15 @@
             <form id="shortcutForm" onsubmit="handleFormSubmit(event)" class="p-5 flex flex-col gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Título do Atalho *</label>
-                    <input type="text" id="shortcutTitle" required placeholder="" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="shortcutTitle" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link ou Nome do Arquivo *</label>
-                    <input type="text" id="fileName" required placeholder="" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="fileName" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div id="categoryContainer">
                     <label id="categoryLabel" class="block text-xs font-semibold text-gray-600 uppercase mb-1">Categoria *</label>
-                    <input type="text" id="shortcutCategory" list="categorySuggestions" placeholder="" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="shortcutCategory" list="categorySuggestions" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <datalist id="categorySuggestions"></datalist>
                 </div>
                 <div class="flex items-center gap-2 py-1">
@@ -408,7 +396,7 @@
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link do Ícone / Imagem (Opcional)</label>
                     <div class="flex items-center gap-2">
                         <div class="relative flex-1">
-                            <input type="text" id="customIconUrl" placeholder="" oninput="updateIconPreview()" class="w-full pl-3 pr-16 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <input type="text" id="customIconUrl" oninput="updateIconPreview()" class="w-full pl-3 pr-16 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-gray-400">
                                 <button type="button" onclick="triggerFileSelect('customIconUrl', 'iconPreviewContainer')" title="Procurar" class="hover:text-blue-600 text-sm">
                                     <i class="fa-solid fa-folder-open"></i>
@@ -482,7 +470,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link do novo ícone</label>
                     <div class="relative">
-                        <input type="text" id="editCustomIconUrl" placeholder="" class="w-full pl-3 pr-16 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="text" id="editCustomIconUrl" class="w-full pl-3 pr-16 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-gray-400">
                             <button type="button" onclick="triggerFileSelect('editCustomIconUrl')" title="Procurar" class="hover:text-blue-600 text-sm">
                                 <i class="fa-solid fa-folder-open"></i>
@@ -520,7 +508,6 @@
         </div>
     </div>
     
-    <!-- Modal Confirmação Remoção Todos -->
     <div id="deleteAllModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
             <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
@@ -539,7 +526,6 @@
         </div>
     </div>
 
-    <!-- Modal Confirmação Exclusão Categoria -->
     <div id="deleteCategoryModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
             <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
@@ -560,6 +546,9 @@
     </div>
 
     <script>
+        // CONFIGURAÇÃO DO GOOGLE APPS SCRIPT
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNRHauds83by09v_Dq5wYROW87ycWqqf1mn48VeRi7MXCHyh0g4v6VtnEULq8_jpA/exec"; // Cole a URL gerada na implantação aqui
+
         const ADMIN_PASSWORD = "Admin@123456";
 
         function generateUniqueId() {
@@ -584,7 +573,6 @@
             return url.trim().toLowerCase().replace(/\/+$/, '');
         }
 
-        // Garante ID único em todos os elementos salvos
         let htmlFiles = rawHtmlFiles.map((item, idx) => ({ 
             id: item.id || ('id_init_' + idx + '_' + Math.random().toString(36).substr(2, 5)),
             ...item, 
@@ -595,7 +583,6 @@
         localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
 
         let categoryCustomizations = JSON.parse(localStorage.getItem('local_category_customizations')) || {};
-
         let licensedTo = localStorage.getItem('local_app_license') || 'Sebastião Torquato';
         
         const mostVisitedCount = htmlFiles.filter(item => (item.visitCount || 0) > 0).length;
@@ -609,6 +596,47 @@
         
         let targetFileInputId = null;
         let targetFilePreviewId = null;
+
+        // FUNÇÕES DE SINCRONIZAÇÃO COM O GOOGLE SHEETS
+        async function syncToGoogleSheets() {
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("SUA_URL_DO_WEB_APP_AQUI")) return;
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ shortcuts: htmlFiles })
+                });
+            } catch (error) {
+                console.error("Erro ao sincronizar com Google Sheets:", error);
+            }
+        }
+
+        async function loadFromGoogleSheets() {
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("SUA_URL_DO_WEB_APP_AQUI")) return;
+            try {
+                const response = await fetch(APPS_SCRIPT_URL);
+                const result = await response.json();
+                if (result.status === "success" && result.shortcuts && result.shortcuts.length > 0) {
+                    htmlFiles = result.shortcuts;
+                    saveToStorage(false); // Salva localmente sem disparar novo envio para o Sheets
+                    render();
+                }
+            } catch (error) {
+                console.error("Erro ao carregar dados do Google Sheets:", error);
+            }
+        }
+
+        function saveToStorage(shouldSyncSheet = true) {
+            localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
+            localStorage.setItem('local_category_customizations', JSON.stringify(categoryCustomizations));
+            localStorage.setItem('local_last_category', currentCategory);
+            localStorage.setItem('local_category_view_modes', JSON.stringify(categoryViewModes));
+
+            if (shouldSyncSheet) {
+                syncToGoogleSheets();
+            }
+        }
 
         function openShortcut(url, itemId) {
             if (itemId) {
@@ -741,13 +769,6 @@
             localStorage.setItem('local_app_license', val);
             updateLicenseDisplay();
             closeLicenseModal();
-        }
-
-        function saveToStorage() {
-            localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
-            localStorage.setItem('local_category_customizations', JSON.stringify(categoryCustomizations));
-            localStorage.setItem('local_last_category', currentCategory);
-            localStorage.setItem('local_category_view_modes', JSON.stringify(categoryViewModes));
         }
 
         function openModal() {
@@ -1312,7 +1333,6 @@
             categorySuggestions.innerHTML = Array.from(uniqueCategories).sort().map(cat => `<option value="${cat}">`).join('');
             categoryList.innerHTML = '';
 
-            // Categoria Favoritos
             const favoritesSelected = currentCategory === 'favorites';
             const favoritesCount = htmlFiles.filter(s => !!s.isFavorite).length;
             const favoritesBtn = document.createElement('button');
@@ -1331,7 +1351,6 @@
             `;
             categoryList.appendChild(favoritesBtn);
 
-            // Categoria Mais Visitados
             const mostVisitedSelected = currentCategory === 'most_visited';
             const mostVisitedCount = htmlFiles.filter(s => (s.visitCount || 0) > 0).length;
             const mostVisitedBtn = document.createElement('button');
@@ -1350,7 +1369,6 @@
             `;
             categoryList.appendChild(mostVisitedBtn);
 
-            // Categoria Todos
             const allSelected = currentCategory === 'all';
             const allBtn = document.createElement('button');
             allBtn.id = 'cat-all';
@@ -1537,7 +1555,6 @@
                 }
             }
 
-            // Ordenação: Se for "Mais Visitados", ordena por contagem de visitas. Caso contrário, ordena por ordem alfabética.
             if (currentCategory === 'most_visited' && !isSearchResult) {
                 filtered.sort((a, b) => (b.visitCount || 0) - (a.visitCount || 0));
             } else {
@@ -1666,16 +1683,16 @@
         // Inicialização
         window.onload = function() {
             render();
+            loadFromGoogleSheets(); // Tenta carregar os dados atualizados do Google Sheets
         };
     </script>
     
-      <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('Service Worker Registrado com Sucesso!'))
-      .catch(err => console.log('Erro ao registrar Service Worker:', err));
-  }
-</script>
-    
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log('Service Worker Registrado com Sucesso!'))
+                .catch(err => console.log('Erro ao registrar Service Worker:', err));
+        }
+    </script>
 </body>
 </html>
