@@ -79,8 +79,8 @@
             <!-- Botões Desktop -->
             <div class="hidden md:flex items-center gap-2 shrink-0">
                 <!-- Dropdown Links -->
-                <div class="relative dropdown-container">
-                    <button type="button" id="btnBackupDesk" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium cursor-pointer">
+                <div class="relative">
+                    <button onclick="toggleDropdown('backupDropdownDesk')" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium">
                         <i class="fa-solid fa-database text-blue-600"></i> 
                         <span>Links</span>
                         <i class="fa-solid fa-chevron-down text-[10px]"></i>
@@ -93,8 +93,8 @@
                 </div>
 
                 <!-- Dropdown Visualização -->
-                <div class="relative dropdown-container">
-                    <button type="button" id="btnViewDesk" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium cursor-pointer">
+                <div class="relative">
+                    <button onclick="toggleDropdown('viewDropdownDesk')" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium">
                         <i class="fa-solid fa-eye text-blue-600"></i> 
                         <span>Visualização</span>
                         <i class="fa-solid fa-chevron-down text-[10px]"></i>
@@ -134,11 +134,9 @@
             <div class="flex md:hidden items-center justify-between gap-1.5 w-full overflow-x-auto pb-1">
                 <button onclick="openModal()" class="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium shrink-0"><i class="fa-solid fa-plus"></i> Novo</button>
                 
-                <div class="relative dropdown-container shrink-0">
-                    <button type="button" id="btnBackupMob" class="px-2 py-1.5 text-xs rounded bg-gray-100 border text-gray-700 flex items-center gap-1 font-medium cursor-pointer">
-                        <i class="fa-solid fa-database text-blue-600"></i> 
-                        <span>Links</span> 
-                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                <div class="relative shrink-0">
+                    <button onclick="toggleDropdown('backupDropdownMob')" class="px-2 py-1.5 text-xs rounded bg-gray-100 border text-gray-700 flex items-center gap-1 font-medium">
+                        <i class="fa-solid fa-database text-blue-600"></i> Links <i class="fa-solid fa-chevron-down text-[10px]"></i>
                     </button>
                     <div id="backupDropdownMob" class="absolute left-0 mt-1 w-40 bg-white border rounded-md shadow-lg hidden z-30 py-1">
                         <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-download"></i> Exportar</button>
@@ -147,11 +145,9 @@
                     </div>
                 </div>
 
-                <div class="relative dropdown-container shrink-0">
-                    <button type="button" id="btnViewMob" class="px-2 py-1.5 text-xs rounded bg-gray-100 border text-gray-700 flex items-center gap-1 font-medium cursor-pointer">
-                        <i class="fa-solid fa-eye text-blue-600"></i> 
-                        <span>Visualização</span> 
-                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                <div class="relative shrink-0">
+                    <button onclick="toggleDropdown('viewDropdownMob')" class="px-2 py-1.5 text-xs rounded bg-gray-100 border text-gray-700 flex items-center gap-1 font-medium">
+                        <i class="fa-solid fa-eye text-blue-600"></i> Visualização <i class="fa-solid fa-chevron-down text-[10px]"></i>
                     </button>
                     <div id="viewDropdownMob" class="absolute left-0 mt-1 w-36 bg-white border rounded-md shadow-lg hidden z-30 py-1">
                         <button onclick="setViewMode('grid'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-border-all"></i> Grade</button>
@@ -575,9 +571,7 @@
             return categoryViewModes[cat] || 'grid';
         }
 
-        function toggleDropdown(event, id) {
-            event.stopPropagation();
-            event.preventDefault();
+        function toggleDropdown(id) {
             const el = document.getElementById(id);
             const isHidden = el.classList.contains('hidden');
             closeAllDropdowns();
@@ -595,7 +589,6 @@
 
         function toggleActionMenu(event, menuId) {
             event.stopPropagation();
-            event.preventDefault();
             const menu = document.getElementById(menuId);
             const isHidden = menu.classList.contains('hidden');
             closeAllActionMenus();
@@ -608,51 +601,13 @@
             document.querySelectorAll('.action-menu-dropdown').forEach(m => m.classList.add('hidden'));
         }
 
-        // Lógica Global de Fechamento de Menus com Adicionar de Eventos Nativos
-        document.addEventListener('click', function(e) {
+        window.addEventListener('click', function(e) {
             if (!e.target.closest('.action-menu-container') && !e.target.closest('button[onclick*="toggleActionMenu"]')) {
                 closeAllActionMenus();
             }
-            if (!e.target.closest('.dropdown-container')) {
+            if (!e.target.closest('button')) {
                 closeAllDropdowns();
             }
-        });
-
-        document.addEventListener('touchend', function(e) {
-            if (!e.target.closest('.action-menu-container') && !e.target.closest('button[onclick*="toggleActionMenu"]')) {
-                closeAllActionMenus();
-            }
-            if (!e.target.closest('.dropdown-container')) {
-                closeAllDropdowns();
-            }
-        }, {passive: true});
-
-        // Configuração de Eventos Nativos robustos para Mobile nos botões de Links e Visualização
-        window.addEventListener('DOMContentLoaded', () => {
-            const dropdownPairs = [
-                { btn: 'btnBackupDesk', menu: 'backupDropdownDesk' },
-                { btn: 'btnViewDesk', menu: 'viewDropdownDesk' },
-                { btn: 'btnBackupMob', menu: 'backupDropdownMob' },
-                { btn: 'btnViewMob', menu: 'viewDropdownMob' }
-            ];
-
-            dropdownPairs.forEach(pair => {
-                const btnEl = document.getElementById(pair.btn);
-                if (btnEl) {
-                    const handleOpen = (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        const menuEl = document.getElementById(pair.menu);
-                        const isHidden = menuEl.classList.contains('hidden');
-                        closeAllDropdowns();
-                        if (isHidden) {
-                            menuEl.classList.remove('hidden');
-                        }
-                    };
-                    btnEl.addEventListener('click', handleOpen);
-                    btnEl.addEventListener('touchend', handleOpen);
-                }
-            });
         });
 
         function renderCategories() {
@@ -677,8 +632,8 @@
                     actionMenuHtml = `
                         <div class="flex items-center gap-1 shrink-0 relative action-menu-container">
                             <span class="sidebar-text md:hidden text-xs bg-gray-200/70 text-gray-600 px-2 py-0.5 rounded-full">${count}</span>
-                            <button type="button" onclick="toggleActionMenu(event, '${catMenuId}')" title="Ações" class="sidebar-text md:hidden p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors cursor-pointer">
-                                <i class="fa-solid fa-ellipsis-vertical text-xs pointer-events-none"></i>
+                            <button onclick="toggleActionMenu(event, '${catMenuId}')" title="Ações" class="sidebar-text md:hidden p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors">
+                                <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
                             </button>
                             <div id="${catMenuId}" class="action-menu-dropdown ${catMenuPositionClass} w-36 bg-white border border-gray-200 rounded-md shadow-xl hidden z-50 py-1 text-left">
                                 <button onclick="event.stopPropagation(); openEditCategoryModal('${catVal.replace(/'/g, "\\'")}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
@@ -698,7 +653,7 @@
                 }
 
                 btn.innerHTML = `
-                    <span class="flex items-center gap-2 truncate flex-1 min-w-0 pointer-events-none">
+                    <span class="flex items-center gap-2 truncate flex-1 min-w-0">
                         <i class="${iconClass} shrink-0"></i>
                         <span class="sidebar-text md:hidden truncate">${label}</span>
                     </span>
@@ -828,18 +783,18 @@
                         <div class="group relative flex flex-col items-center justify-center p-3 rounded-lg cursor-pointer text-center bg-white border border-gray-200/80 hover:border-blue-300 hover:shadow-sm"
                              onclick="openShortcut('${targetUrl}', '${item.id}')">
                             
-                            <button type="button" onclick="toggleFavorite(event, '${item.id}')" class="absolute top-1 left-1 p-1 text-gray-300 hover:text-amber-400 z-10 cursor-pointer">
-                                <i class="fa-solid fa-star text-xs ${isFav ? 'text-amber-400' : ''} pointer-events-none"></i>
+                            <button onclick="toggleFavorite(event, '${item.id}')" class="absolute top-1 left-1 p-1 text-gray-300 hover:text-amber-400 z-10">
+                                <i class="fa-solid fa-star text-xs ${isFav ? 'text-amber-400' : ''}"></i>
                             </button>
 
-                            <div class="w-10 h-10 mb-2 flex items-center justify-center pointer-events-none">
+                            <div class="w-10 h-10 mb-2 flex items-center justify-center">
                                 <img src="${iconUrl}" class="w-8 h-8 object-contain" onerror="this.src='https://via.placeholder.com/32'">
                             </div>
-                            <span class="text-xs text-gray-700 line-clamp-2 w-full font-medium pointer-events-none">${item.title || item.name}</span>
+                            <span class="text-xs text-gray-700 line-clamp-2 w-full font-medium">${item.title || item.name}</span>
                             
                             <div class="absolute top-1 right-1 action-menu-container z-10">
-                                <button type="button" onclick="toggleActionMenu(event, '${menuId}')" title="Ações" class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors cursor-pointer">
-                                    <i class="fa-solid fa-ellipsis-vertical text-xs pointer-events-none"></i>
+                                <button onclick="toggleActionMenu(event, '${menuId}')" title="Ações" class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors">
+                                    <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
                                 </button>
                                 <div id="${menuId}" class="action-menu-dropdown absolute top-full right-0 w-36 bg-white border rounded shadow-lg hidden z-50 py-1 text-left text-xs">
                                     <button onclick="event.stopPropagation(); openEditShortcutModal('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700"><i class="fa-solid fa-pen text-blue-500"></i> Editar</button>
@@ -864,9 +819,9 @@
                     return `
                         <div class="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 border-b border-gray-100 cursor-pointer transition-colors relative"
                              onclick="openShortcut('${targetUrl}', '${item.id}')">
-                            <div class="flex items-center gap-3 min-w-0 flex-1 pointer-events-none">
-                                <button type="button" onclick="toggleFavorite(event, '${item.id}')" class="p-1 text-gray-300 hover:text-amber-400 cursor-pointer pointer-events-auto">
-                                    <i class="fa-solid fa-star text-xs ${isFav ? 'text-amber-400' : ''} pointer-events-none"></i>
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <button onclick="toggleFavorite(event, '${item.id}')" class="p-1 text-gray-300 hover:text-amber-400">
+                                    <i class="fa-solid fa-star text-xs ${isFav ? 'text-amber-400' : ''}"></i>
                                 </button>
                                 <div class="w-7 h-7 flex items-center justify-center bg-gray-100 rounded shrink-0">
                                     <img src="${iconUrl}" class="w-5 h-5 object-contain" onerror="this.src='https://via.placeholder.com/20'">
@@ -877,8 +832,8 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 shrink-0 action-menu-container">
-                                <button type="button" onclick="toggleActionMenu(event, '${menuId}')" title="Ações" class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors cursor-pointer">
-                                    <i class="fa-solid fa-ellipsis-vertical text-xs pointer-events-none"></i>
+                                <button onclick="toggleActionMenu(event, '${menuId}')" title="Ações" class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors">
+                                    <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
                                 </button>
                                 <div id="${menuId}" class="action-menu-dropdown ${menuPositionClass} w-36 bg-white border rounded shadow-lg hidden z-50 py-1 text-left text-xs">
                                     <button onclick="event.stopPropagation(); openEditShortcutModal('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700"><i class="fa-solid fa-pen text-blue-500"></i> Editar</button>
