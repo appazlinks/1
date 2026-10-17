@@ -112,7 +112,7 @@
                 </div>
 
                 <!-- Botão Atualizar / Sincronizar -->
-                <button type="button" onclick="syncFromGoogleSheets()" title="Atualizar dados da planilha Google" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center cursor-pointer">
+                <button type="button" onclick="syncAll()" title="Sincronizar com a planilha Google" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center cursor-pointer">
                     <i id="syncIconDesk" class="fa-solid fa-rotate-right pointer-events-none"></i>
                 </button>
 
@@ -161,7 +161,7 @@
                     </div>
                 </div>
 
-                <button type="button" onclick="syncFromGoogleSheets()" title="Atualizar dados" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:text-blue-600 transition-all flex items-center justify-center shrink-0 cursor-pointer">
+                <button type="button" onclick="syncAll()" title="Sincronizar com a planilha Google" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:text-blue-600 transition-all flex items-center justify-center shrink-0 cursor-pointer">
                     <i id="syncIconMob" class="fa-solid fa-rotate-right pointer-events-none"></i>
                 </button>
             </div>
@@ -480,6 +480,7 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ shortcuts: htmlFiles })
                 });
+                localStorage.setItem('local_sync_dirty', '0');
             } catch (err) {
                 console.error("Erro ao sincronizar envio:", err);
             } finally {
@@ -499,8 +500,10 @@
             try {
                 const res = await fetchWithTimeout(APPS_SCRIPT_URL);
                 const data = await res.json();
+                if (data.status === "success") localStorage.setItem('local_sync_pulled', '1');
                 if (data.status === "success" && Array.isArray(data.shortcuts) && data.shortcuts.length > 0) {
                     htmlFiles = data.shortcuts;
+                    localStorage.setItem('local_sync_dirty', '0');
                     localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
                     render();
                 }
@@ -513,11 +516,29 @@
             }
         }
 
+        // Chamada pelo botão Atualizar (única forma de sincronizar):
+        // - se há alterações locais pendentes E este aparelho já baixou os dados da planilha antes,
+        //   envia os dados locais para a planilha;
+        // - caso contrário, baixa os dados da planilha. Isso protege a planilha de ser sobrescrita
+        //   por um aparelho novo ou desatualizado.
+        async function syncAll() {
+            if (!isSyncConfigured()) return;
+            const dirty = localStorage.getItem('local_sync_dirty') === '1';
+            const pulled = localStorage.getItem('local_sync_pulled') === '1';
+            if (dirty && pulled) {
+                await syncToGoogleSheets();
+            } else {
+                await syncFromGoogleSheets();
+            }
+        }
+
         function saveToStorage(forceSync = true) {
             localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
             localStorage.setItem('local_category_customizations', JSON.stringify(categoryCustomizations));
             localStorage.setItem('local_category_view_modes', JSON.stringify(categoryViewModes));
-            if (forceSync) syncToGoogleSheets();
+            // Não sincroniza mais automaticamente: apenas marca que há alterações locais
+            // pendentes. O envio só acontece quando o usuário clicar no botão Atualizar.
+            if (forceSync) localStorage.setItem('local_sync_dirty', '1');
         }
 
         function openShortcut(url, itemId) {
@@ -1108,9 +1129,11 @@
             renderGrid();
         }
 
+        // Sincroniza apenas em dois momentos: ao entrar no aplicativo e ao clicar no botão Atualizar.
+        // Alterações feitas durante o uso (adicionar, editar, remover) não disparam sincronização.
         window.onload = async function() {
             render();
-            await syncFromGoogleSheets();
+            await syncAll();
         };
     </script>
 </body>
