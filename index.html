@@ -571,8 +571,38 @@
 
         function filterCategory(cat) {
             currentCategory = cat;
+            // Redesenha o menu lateral (para destacar a categoria selecionada) e a lista de atalhos
+            renderCategories();
+            applySidebarState();
             renderGrid();
             if (window.innerWidth < 768) collapseSidebar();
+        }
+
+        // Atualiza o título (e o ícone) do cabeçalho conforme a categoria selecionada
+        function updateCategoryHeader() {
+            const titleEl = document.getElementById('currentCategoryTitle');
+            if (!titleEl) return;
+
+            let label, iconClass;
+            if (currentCategory === 'all') {
+                label = 'Todos os Atalhos';
+                iconClass = 'fa-solid fa-folder-open text-blue-600';
+            } else if (currentCategory === 'favorites') {
+                label = 'Favoritos';
+                iconClass = 'fa-solid fa-star text-amber-400';
+            } else if (currentCategory === 'most_visited') {
+                label = 'Mais Visitados';
+                iconClass = 'fa-solid fa-fire text-amber-500';
+            } else {
+                label = currentCategory;
+                iconClass = getCategoryIcon(currentCategory);
+            }
+
+            titleEl.innerHTML = '';
+            const icon = document.createElement('i');
+            icon.className = iconClass;
+            titleEl.appendChild(icon);
+            titleEl.appendChild(document.createTextNode(' ' + label));
         }
 
         function setViewMode(mode) {
@@ -791,6 +821,7 @@
             const empty = document.getElementById('emptyState');
             const viewMode = getViewMode(currentCategory);
             if (!grid) return;
+            updateCategoryHeader();
 
             let filtered = htmlFiles;
             if (searchQuery.length > 0) {
