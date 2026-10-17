@@ -1,1 +1,1681 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>azlinks</title>
+    <!-- Favicon Moderno -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%232563eb'/><path d='M30 50l20-20v15h20v10H50v15z' fill='%23ffffff'/><circle cx='70' cy='70' r='8' fill='%2360a5fa'/></svg>">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="azlinks-192x192.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Segoe UI"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+       
+    <style>
+        body { background-color: #f3f3f3; user-select: none; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cdcdcd; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a6a6a6; }
 
+        .category-scroll {
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (min-width: 768px) {
+            .desktop-logo-text {
+                font-size: 32px !important; 
+            }
+            .desktop-logo-svg {
+                width: 190px !important;
+                height: 46px !important;
+            }
+            .category-scroll {
+                max-height: calc(100vh - 100px);
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen min-h-screen h-[100dvh] font-sans overflow-hidden text-slate-800">
+
+    <!-- Barra Superior -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-gray-200 p-3 flex flex-col items-start md:items-stretch gap-3 shadow-sm z-20 shrink-0">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center gap-2">
+                <div class="flex items-center cursor-pointer select-none shrink-0 self-center" onclick="window.location.reload()">
+                    <svg class="desktop-logo-svg" width="140" height="34" viewBox="0 0 180 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" rx="10" fill="#2563EB"/>
+                        <path d="M12 28L20 14L28 28H23.5L20 21.5L16.5 28H12Z" fill="white"/>
+                        <path d="M15 25H25" stroke="white" stroke-width="2"/>
+                        <text class="desktop-logo-text" x="48" y="28" font-family="'Segoe UI', sans-serif" font-weight="700" font-size="22" fill="#1E293B">AZ<tspan fill="#2563EB">Links</tspan></text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Botões Desktop -->
+            <div class="hidden md:flex items-center gap-2 shrink-0">
+                <div class="relative">
+                    <button onclick="toggleDropdown('backupDropdownDesk')" title="Opções de Cópia de Segurança" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-database text-blue-600"></i> 
+                        <span>Links</span>
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </button>
+                    <div id="backupDropdownDesk" class="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1">
+                        <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-download text-gray-400"></i> Exportar
+                        </button>
+                        <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-upload text-gray-400"></i> Importar
+                        </button>
+                        <a href="https://azlinks.rf.gd/links.zip" target="_blank" onclick="closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-file-arrow-down text-gray-400"></i> Baixar
+                        </a>
+                        <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-trash text-red-500"></i> Remover Todos
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <button onclick="toggleDropdown('viewDropdownDesk')" title="Modo de Visualização" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-eye text-blue-600"></i> 
+                        <span>Visualização</span>
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </button>
+                    <div id="viewDropdownDesk" class="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1">
+                        <button onclick="setViewMode('grid'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-border-all text-gray-400"></i> Grade
+                        </button>
+                        <button onclick="setViewMode('list'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-list text-gray-400"></i> Lista
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Botão Recarregar Página Desktop -->
+                <button onclick="window.location.reload()" title="Recarregar página" class="p-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+
+                <button onclick="openModal()" title="Adicionar novo atalho" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-sm font-medium shadow-sm transition-all">
+                    <i class="fa-solid fa-plus"></i> <span>Novo</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between w-full gap-2">
+            <div class="hidden md:flex items-center gap-2 flex-1">
+                <!-- Botão Hambúrguer Desktop -->
+                <button onclick="toggleMobileSidebar()" title="Menu" class="p-2 text-gray-600 hover:text-blue-600 focus:outline-none rounded-md hover:bg-gray-100 transition-colors shrink-0">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div class="relative w-full">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" id="searchInputDesktop" placeholder="" 
+                           class="w-full pl-9 pr-8 py-1.5 bg-gray-50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all search-input">
+                    <button onclick="clearSearch()" title="Limpar pesquisa" class="clear-search-btn absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden text-sm">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botões Mobile -->
+            <div class="flex md:hidden items-center justify-between gap-2 w-full">
+                <button onclick="openModal()" title="Adicionar novo atalho" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-sm font-medium shadow-sm transition-all">
+                    <i class="fa-solid fa-plus"></i> <span>Novo</span>
+                </button>
+
+                <div class="relative">
+                    <button onclick="toggleDropdown('backupDropdownMob')" title="Opções de Cópia de Segurança" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-database text-blue-600"></i> 
+                        <span>Links</span>
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </button>
+                    <div id="backupDropdownMob" class="absolute left-0 mt-1 w-40 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1">
+                        <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-download text-gray-400"></i> Exportar
+                        </button>
+                        <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-upload text-gray-400"></i> Importar
+                        </button>
+                        <a href="https://azlinks.rf.gd/links.zip" target="_blank" onclick="closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-file-arrow-down text-gray-400"></i> Baixar
+                        </a>
+                        <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-trash text-red-500"></i> Remover Todos
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <button onclick="toggleDropdown('viewDropdownMob')" title="Modo de Visualização" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-eye text-blue-600"></i> 
+                        <span>Visualização</span>
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </button>
+                    <div id="viewDropdownMob" class="absolute left-0 mt-1 w-36 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1">
+                        <button onclick="setViewMode('grid'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-border-all text-gray-400"></i> Grade
+                        </button>
+                        <button onclick="setViewMode('list'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-list text-gray-400"></i> Lista
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Botão Recarregar Página Mobile -->
+                <button onclick="window.location.reload()" title="Recarregar página" class="p-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex md:hidden items-center gap-2 w-full">
+            <!-- Botão Hambúrguer Mobile -->
+            <button onclick="toggleMobileSidebar()" title="Menu" class="p-2 text-gray-600 hover:text-blue-600 focus:outline-none rounded-md hover:bg-gray-100 transition-colors shrink-0">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <div class="relative flex-1">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="searchInputMobile" placeholder="" 
+                       class="w-full pl-9 pr-8 py-1.5 bg-gray-50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all search-input">
+                <button onclick="clearSearch()" title="Limpar pesquisa" class="clear-search-btn absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Cabeçalho da Categoria e Quantidade de Itens -->
+        <div class="flex items-center justify-between bg-white px-4 py-2.5 rounded-lg border border-gray-200/80 shadow-sm w-full">
+            <h2 id="currentCategoryTitle" class="font-semibold text-gray-800 text-sm md:text-base flex items-center gap-2">
+                <i class="fa-solid fa-folder-open text-blue-600"></i> Todos os Atalhos
+            </h2>
+            <span id="currentCategoryCount" class="text-xs bg-blue-100 text-blue-800 font-semibold px-2.5 py-0.5 rounded-full">
+                0 itens
+            </span>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden relative">
+        <!-- Sidebar Escondida no Mobile por padrão -->
+        <aside id="sidebar" onmouseenter="expandSidebar()" onmouseleave="collapseSidebar()" 
+               class="fixed inset-y-0 left-0 -translate-x-full md:translate-x-0 md:relative bg-gray-50/95 backdrop-blur-md border-r border-gray-200 p-3 flex flex-col justify-between transition-all duration-300 w-64 md:w-16 z-40 md:z-30 shadow-lg md:shadow-none">
+            
+            <div class="flex flex-col gap-1 w-full category-scroll pb-10 md:pb-0">
+                <div class="flex items-center justify-between mb-2 px-1 border-b border-gray-200/60 pb-2 md:hidden">
+                    <div id="sidebarTitle" class="text-xs font-bold text-gray-500 uppercase tracking-wider truncate">FILTROS</div>
+                    <button onclick="toggleMobileSidebar()" title="Fechar menu" class="text-gray-500 hover:text-gray-800 md:hidden p-1">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+                
+                <div id="categoryList" class="flex flex-col gap-1 mt-1"></div>
+            </div>
+        </aside>
+
+        <div id="sidebarOverlay" onclick="collapseSidebar()" class="fixed inset-0 bg-black/40 z-30 hidden"></div>
+
+        <main class="flex-1 flex flex-col p-3 md:p-4 overflow-y-auto pb-20 md:pb-6 gap-4">
+            <div id="shortcutsGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 gap-3"></div>
+            <div id="shortcutsList" class="hidden flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm overflow-visible"></div>
+            
+            <!-- Aviso de Cópia não Registrada -->
+            <div id="unregisteredNotice" class="hidden w-full border-2 border-red-500 rounded-lg p-6 md:p-8 flex flex-col items-center justify-center bg-white/50 my-4 text-center gap-2">
+                <span class="text-red-500 font-semibold text-xl md:text-2xl tracking-wide select-none">Cópia não Registrada!</span>
+                <span class="text-gray-700 font-medium text-sm md:text-base select-none">Entrar em contato com o desenvolvedor pelo whatsapp: 8298734-0685 para regularizar</span>
+            </div>
+
+            <div id="emptyState" class="hidden flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-400">
+                <i class="fa-regular fa-folder-open text-5xl mb-3 text-gray-300"></i>
+                <p class="text-base font-medium">Nenhum atalho encontrado</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Rodapé Fixo -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2.5 flex items-center justify-between text-xs text-gray-500 z-40 shadow-md md:relative md:z-20">
+        <div onclick="openPasswordModal()" class="flex items-center gap-2 truncate cursor-pointer hover:text-blue-600 transition-colors w-full justify-center md:justify-start">
+            <i class="fa-solid fa-shield-halved text-blue-600 shrink-0"></i>
+            <span class="truncate">Licenciado para: <strong id="footerLicenseName" class="text-gray-700 hover:text-blue-600">Sebastião Torquato</strong></span>
+        </div>
+    </footer>
+
+    <input type="file" id="localFileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+    <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="handleImportBackup(event)">
+
+    <!-- Modais -->
+    <!-- Modal Senha -->
+    <div id="passwordModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-lock text-amber-500"></i> Acesso Restrito
+                </h3>
+                <button onclick="closePasswordModal()" title="Fechar" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handlePasswordSubmit(event)" class="p-5 flex flex-col gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Senha de Administrador</label>
+                    <input type="password" id="adminPasswordInput" required placeholder="" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div id="passwordErrorMsg" class="hidden items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-xs">
+                    <i class="fa-solid fa-circle-exclamation shrink-0"></i>
+                    <span id="passwordErrorText">Senha incorreta.</span>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closePasswordModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Entrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Licença -->
+    <div id="licenseModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-building text-blue-600"></i> Registar Licença
+                </h3>
+                <button onclick="closeLicenseModal()" title="Fechar" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Nome da Empresa ou Pessoa *</label>
+                    <input type="text" id="licenseInput" placeholder="a" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeLicenseModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="button" onclick="saveLicense()" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Guardar Registo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição de Categoria -->
+    <div id="editCategoryModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-pen text-blue-600"></i> Editar Categoria
+                </h3>
+                <button onclick="closeEditCategoryModal()" title="Fechar" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleEditCategorySubmit(event)" class="p-5 flex flex-col gap-3">
+                <input type="hidden" id="editCategoryOldName">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Nome / Descrição da Categoria *</label>
+                    <input type="text" id="editCategoryNewName" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Classe do Ícone (FontAwesome) *</label>
+                    <input type="text" id="editCategoryIconClass" required placeholder="Ex: fa-solid fa-folder" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <p class="text-[11px] text-gray-400 mt-1">Exemplos: <code>fa-solid fa-brain</code>, <code>fa-solid fa-code</code>, <code>fa-solid fa-shield-halved</code></p>
+                </div>
+                <div class="flex items-center justify-end gap-2 mt-2 pt-3 border-t">
+                    <button type="button" onclick="closeEditCategoryModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Alterar Ícone da Categoria -->
+    <div id="editCategoryIconModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-image text-blue-600"></i> Alterar Ícone da Categoria
+                </h3>
+                <button onclick="closeEditCategoryIconModal()" title="Fechar" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+                <input type="hidden" id="editCategoryIconName">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link do Ícone / Imagem (Opcional)</label>
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <input type="text" id="newCategoryIconClass" placeholder="" oninput="updateCategoryIconPreview()" class="w-full pl-3 pr-16 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-gray-400">
+                                <button type="button" onclick="triggerFileSelect('newCategoryIconClass', 'categoryIconPreviewContainer')" title="Procurar" class="hover:text-blue-600 text-sm">
+                                    <i class="fa-solid fa-folder-open"></i>
+                                </button>
+                                <button type="button" onclick="pasteFromClipboard('newCategoryIconClass', 'categoryIconPreviewContainer')" title="Colar" class="hover:text-blue-600 text-sm">
+                                    <i class="fa-solid fa-clipboard"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="categoryIconPreviewContainer" class="w-10 h-10 border rounded-md bg-gray-50 flex items-center justify-center shrink-0 overflow-hidden">
+                            <i class="fa-solid fa-globe text-gray-400 text-sm" id="categoryPreviewPlaceholder"></i>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-gray-400 mt-1">Cole o link de uma imagem ou classe FontAwesome (ex: <code>fa-solid fa-brain text-purple-500</code>).</p>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeEditCategoryIconModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="button" onclick="saveCategoryIcon()" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Salvar Ícone</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Atalho -->
+    <div id="shortcutModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-file-code text-blue-600"></i> Adicionar Atalho
+                </h3>
+                <button onclick="closeModal()" title="Fechar" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="shortcutForm" onsubmit="handleFormSubmit(event)" class="p-5 flex flex-col gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Título do Atalho *</label>
+                    <input type="text" id="shortcutTitle" required placeholder="" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link ou Nome do Arquivo *</label>
+                    <input type="text" id="fileName" required placeholder="" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div id="categoryContainer">
+                    <label id="categoryLabel" class="block text-xs font-semibold text-gray-600 uppercase mb-1">Categoria *</label>
+                    <input type="text" id="shortcutCategory" list="categorySuggestions" placeholder="" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="categorySuggestions"></datalist>
+                </div>
+                <div class="flex items-center gap-2 py-1">
+                    <input type="checkbox" id="shortcutFavorite" class="w-4 h-4 text-amber-500 rounded border-gray-300 focus:ring-amber-400">
+                    <label for="shortcutFavorite" class="text-xs font-semibold text-gray-700 cursor-pointer flex items-center gap-1.5">
+                        <i class="fa-solid fa-star text-amber-400"></i> Adicionar aos Favoritos também
+                    </label>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link do Ícone / Imagem (Opcional)</label>
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <input type="text" id="customIconUrl" placeholder="" oninput="updateIconPreview()" class="w-full pl-3 pr-16 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-gray-400">
+                                <button type="button" onclick="triggerFileSelect('customIconUrl', 'iconPreviewContainer')" title="Procurar" class="hover:text-blue-600 text-sm">
+                                    <i class="fa-solid fa-folder-open"></i>
+                                </button>
+                                <button type="button" onclick="pasteFromClipboard('customIconUrl', 'iconPreviewContainer')" title="Colar" class="hover:text-blue-600 text-sm">
+                                    <i class="fa-solid fa-clipboard"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="iconPreviewContainer" class="w-10 h-10 border rounded-md bg-gray-50 flex items-center justify-center shrink-0 overflow-hidden">
+                            <i class="fa-solid fa-globe text-gray-400 text-sm" id="previewPlaceholder"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-2 mt-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div id="editShortcutModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-pen text-blue-600"></i> Editar Atalho
+                </h3>
+                <button onclick="closeEditShortcutModal()" title="Fechar" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="editShortcutForm" onsubmit="handleEditFormSubmit(event)" class="p-5 flex flex-col gap-3">
+                <input type="hidden" id="editOriginalId">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Título do Atalho *</label>
+                    <input type="text" id="editShortcutTitle" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link ou Nome do Arquivo *</label>
+                    <input type="text" id="editFileName" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Categoria *</label>
+                    <input type="text" id="editShortcutCategory" required list="categorySuggestions" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="flex items-center gap-2 py-1">
+                    <input type="checkbox" id="editShortcutFavorite" class="w-4 h-4 text-amber-500 rounded border-gray-300 focus:ring-amber-400">
+                    <label for="editShortcutFavorite" class="text-xs font-semibold text-gray-700 cursor-pointer flex items-center gap-1.5">
+                        <i class="fa-solid fa-star text-amber-400"></i> Fazer parte dos Favoritos
+                    </label>
+                </div>
+                <div class="flex items-center justify-end gap-2 mt-2 pt-3 border-t">
+                    <button type="button" onclick="closeEditShortcutModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Editar Icone -->
+    <div id="editIconModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-image text-blue-600"></i> Alterar Ícone
+                </h3>
+                <button onclick="closeEditIconModal()" title="Fechar" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+                <input type="hidden" id="editIconShortcutId">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link do novo ícone</label>
+                    <div class="relative">
+                        <input type="text" id="editCustomIconUrl" placeholder="" class="w-full pl-3 pr-16 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-gray-400">
+                            <button type="button" onclick="triggerFileSelect('editCustomIconUrl')" title="Procurar" class="hover:text-blue-600 text-sm">
+                                <i class="fa-solid fa-folder-open"></i>
+                            </button>
+                            <button type="button" onclick="pasteFromClipboard('editCustomIconUrl')" title="Colar" class="hover:text-blue-600 text-sm">
+                                <i class="fa-solid fa-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeEditIconModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="button" onclick="saveCustomIcon()" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Salvar Ícone</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Remover -->
+    <div id="deleteModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Confirmar Remoção
+                </h3>
+                <button onclick="closeDeleteModal()" title="Fechar" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+                <p id="deleteMessage" class="text-sm text-gray-600">Deseja remover este atalho?</p>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="button" id="confirmDeleteBtn" class="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md font-medium">Remover</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Confirmação Remoção Todos -->
+    <div id="deleteAllModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-red-500"></i> Remover Todos os Atalhos
+                </h3>
+                <button onclick="closeDeleteAllModal()" title="Fechar" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+                <p class="text-sm text-gray-600">Tem a certeza que deseja apagar permanentemente todos os atalhos? Esta ação não pode ser desfeita.</p>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeDeleteAllModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="button" onclick="clearAllShortcuts()" class="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md font-medium">Apagar Tudo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmação Exclusão Categoria -->
+    <div id="deleteCategoryModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Remover Categoria
+                </h3>
+                <button onclick="closeDeleteCategoryModal()" title="Fechar" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+                <input type="hidden" id="deleteCategoryNameInput">
+                <p id="deleteCategoryMessage" class="text-sm text-gray-600">Deseja remover esta categoria? Os atalhos dela serão movidos para "Geral".</p>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeDeleteCategoryModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="button" onclick="confirmDeleteCategory()" class="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md font-medium">Remover</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = "Admin@123456";
+
+        function generateUniqueId() {
+            return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        const defaultHtmlFiles = [
+            { id: generateUniqueId(), title: 'g1', name: 'g1', file: 'https://g1.globo.com/', category: 'Notícias', customIcon: '', visitCount: 0, isFavorite: false },
+            { id: generateUniqueId(), title: 'g1 alagoas', name: 'g1 alagoas', file: 'https://g1.globo.com/al/alagoas/', category: 'Notícias', customIcon: '', visitCount: 0, isFavorite: false },
+            { id: generateUniqueId(), title: 'Gemini', name: 'Gemini', file: 'https://gemini.google.com/app', category: 'IA', customIcon: '', visitCount: 0, isFavorite: true },
+            { id: generateUniqueId(), title: 'Hostinger', name: 'Hostinger', file: 'https://hpanel.hostinger.com/domain/aplicrh.com/dns?location=dns_zone_editor&tab=dns_records', category: 'Geral', customIcon: '', visitCount: 0, isFavorite: false },
+            { id: generateUniqueId(), title: 'Selbstor Achadinhos', name: 'Selbstor Achadinhos', file: 'https://collshp.com/selbstor', category: 'Lojas', customIcon: '', visitCount: 0, isFavorite: false },
+            { id: generateUniqueId(), title: 'TNH1', name: 'TNH1', file: 'https://www.tnh1.com.br', category: 'Notícias', customIcon: '', visitCount: 0, isFavorite: false },
+            { id: generateUniqueId(), title: 'Uol', name: 'Uol', file: 'https://www.uol.com.br', category: 'Geral', customIcon: '', visitCount: 0, isFavorite: false },
+            { id: generateUniqueId(), title: 'Youtube', name: 'Youtube', file: 'https://www.youtube.com', category: 'Canais', customIcon: '', visitCount: 0, isFavorite: true }
+        ];
+
+        let rawHtmlFiles = JSON.parse(localStorage.getItem('local_html_shortcuts')) || defaultHtmlFiles;
+        
+        function normalizeUrl(url) {
+            if (!url) return '';
+            return url.trim().toLowerCase().replace(/\/+$/, '');
+        }
+
+        // Garante ID único em todos os elementos salvos
+        let htmlFiles = rawHtmlFiles.map((item, idx) => ({ 
+            id: item.id || ('id_init_' + idx + '_' + Math.random().toString(36).substr(2, 5)),
+            ...item, 
+            visitCount: item.visitCount || 0,
+            isFavorite: item.isFavorite || false 
+        }));
+
+        localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
+
+        let categoryCustomizations = JSON.parse(localStorage.getItem('local_category_customizations')) || {};
+
+        let licensedTo = localStorage.getItem('local_app_license') || 'Sebastião Torquato';
+        
+        const mostVisitedCount = htmlFiles.filter(item => (item.visitCount || 0) > 0).length;
+        const lastCategoryStored = localStorage.getItem('local_last_category') || 'all';
+        let currentCategory = (mostVisitedCount > 0) ? 'most_visited' : lastCategoryStored;
+
+        let searchQuery = '';
+        let itemToDeleteId = null;
+        let categoryViewModes = JSON.parse(localStorage.getItem('local_category_view_modes')) || {};
+        let sidebarOpen = false;
+        
+        let targetFileInputId = null;
+        let targetFilePreviewId = null;
+
+        function openShortcut(url, itemId) {
+            if (itemId) {
+                const item = htmlFiles.find(f => f.id === itemId);
+                if (item) {
+                    item.visitCount = (item.visitCount || 0) + 1;
+                    saveToStorage();
+                }
+            }
+
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                window.location.href = url; 
+            } else {
+                window.open(url, '_blank'); 
+            }
+        }
+
+        function toggleFavorite(event, itemId) {
+            event.stopPropagation();
+            const item = htmlFiles.find(f => f.id === itemId);
+            if (item) {
+                item.isFavorite = !item.isFavorite;
+                saveToStorage();
+                render();
+            }
+        }
+
+        window.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'l') {
+                e.preventDefault();
+                openPasswordModal();
+            }
+        });
+
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('.action-menu-container') && !e.target.closest('button[onclick*="toggleActionMenu"]') && !e.target.closest('button[onclick*="toggleCatMenu"]')) {
+                closeAllActionMenus();
+            }
+            if (!e.target.closest('button')) {
+                closeAllDropdowns();
+            }
+        });
+
+        function toggleDropdown(id) {
+            const el = document.getElementById(id);
+            const isHidden = el.classList.contains('hidden');
+            closeAllDropdowns();
+            if (isHidden) {
+                el.classList.remove('hidden');
+            }
+        }
+
+        function closeAllDropdowns() {
+            const dropdowns = ['backupDropdownDesk', 'viewDropdownDesk', 'backupDropdownMob', 'viewDropdownMob'];
+            dropdowns.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+        }
+
+        function toggleActionMenu(event, menuId) {
+            event.stopPropagation();
+            const menu = document.getElementById(menuId);
+            const isHidden = menu.classList.contains('hidden');
+            closeAllActionMenus();
+            if (isHidden) {
+                menu.classList.remove('hidden');
+            }
+        }
+
+        function closeAllActionMenus() {
+            document.querySelectorAll('.action-menu-dropdown').forEach(m => m.classList.add('hidden'));
+        }
+        
+        function openPasswordModal() {
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('passwordErrorMsg').classList.add('hidden');
+            document.getElementById('passwordModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.add('hidden');
+        }
+
+        function handlePasswordSubmit(e) {
+            e.preventDefault();
+            const pass = document.getElementById('adminPasswordInput').value;
+
+            if (pass === ADMIN_PASSWORD) {
+                closePasswordModal();
+                openLicenseModal();
+            } else {
+                const errorDiv = document.getElementById('passwordErrorMsg');
+                errorDiv.classList.remove('hidden');
+                errorDiv.classList.add('flex');
+                document.getElementById('adminPasswordInput').value = '';
+                document.getElementById('adminPasswordInput').focus();
+            }
+        }
+
+        function updateLicenseDisplay() {
+            const footerLicenseEl = document.getElementById('footerLicenseName');
+            const textValue = (licensedTo && licensedTo.trim() !== '') ? licensedTo : 'Sebastião Torquato';
+            if(footerLicenseEl) footerLicenseEl.textContent = textValue;
+
+            const unregisteredNotice = document.getElementById('unregisteredNotice');
+            if (unregisteredNotice) {
+                if (textValue === 'Sebastião Torquato') {
+                    unregisteredNotice.classList.remove('hidden');
+                } else {
+                    unregisteredNotice.classList.add('hidden');
+                }
+            }
+        }
+
+        function openLicenseModal() {
+            document.getElementById('licenseInput').value = licensedTo;
+            document.getElementById('licenseModal').classList.remove('hidden');
+        }
+
+        function closeLicenseModal() {
+            document.getElementById('licenseModal').classList.add('hidden');
+        }
+
+        function saveLicense() {
+            const val = document.getElementById('licenseInput').value.trim();
+            licensedTo = val;
+            localStorage.setItem('local_app_license', val);
+            updateLicenseDisplay();
+            closeLicenseModal();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
+            localStorage.setItem('local_category_customizations', JSON.stringify(categoryCustomizations));
+            localStorage.setItem('local_last_category', currentCategory);
+            localStorage.setItem('local_category_view_modes', JSON.stringify(categoryViewModes));
+        }
+
+        function openModal() {
+            document.getElementById('shortcutTitle').value = '';
+            document.getElementById('fileName').value = '';
+            document.getElementById('shortcutCategory').value = currentCategory === 'favorites' || currentCategory === 'most_visited' || currentCategory === 'all' ? 'Geral' : currentCategory;
+            document.getElementById('shortcutFavorite').checked = currentCategory === 'favorites';
+            document.getElementById('customIconUrl').value = '';
+            updateIconPreview();
+            document.getElementById('shortcutModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('shortcutModal').classList.add('hidden');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const title = document.getElementById('shortcutTitle').value.trim();
+            const file = document.getElementById('fileName').value.trim();
+            let category = document.getElementById('shortcutCategory').value.trim() || 'Geral';
+            const isFav = document.getElementById('shortcutFavorite').checked;
+            const customIcon = document.getElementById('customIconUrl').value.trim();
+
+            if (!title || !file) return;
+
+            const newItem = {
+                id: generateUniqueId(),
+                title,
+                name: title,
+                file,
+                category,
+                customIcon,
+                visitCount: 0,
+                isFavorite: isFav
+            };
+
+            htmlFiles.push(newItem);
+            saveToStorage();
+            closeModal();
+            render();
+        }
+
+        function openEditShortcutModal(itemId) {
+            const item = htmlFiles.find(f => f.id === itemId);
+            if (!item) return;
+
+            document.getElementById('editOriginalId').value = item.id;
+            document.getElementById('editShortcutTitle').value = item.title || item.name;
+            document.getElementById('editFileName').value = item.file || item.name;
+            document.getElementById('editShortcutCategory').value = item.category || 'Geral';
+            document.getElementById('editShortcutFavorite').checked = !!item.isFavorite;
+
+            document.getElementById('editShortcutModal').classList.remove('hidden');
+        }
+
+        function closeEditShortcutModal() {
+            document.getElementById('editShortcutModal').classList.add('hidden');
+        }
+
+        function handleEditFormSubmit(e) {
+            e.preventDefault();
+            const origId = document.getElementById('editOriginalId').value;
+            const newTitle = document.getElementById('editShortcutTitle').value.trim();
+            const newFile = document.getElementById('editFileName').value.trim();
+            const newCat = document.getElementById('editShortcutCategory').value.trim() || 'Geral';
+            const isFav = document.getElementById('editShortcutFavorite').checked;
+
+            const item = htmlFiles.find(f => f.id === origId);
+            if (item) {
+                item.title = newTitle;
+                item.name = newTitle;
+                item.file = newFile;
+                item.category = newCat;
+                item.isFavorite = isFav;
+                saveToStorage();
+            }
+            closeEditShortcutModal();
+            render();
+        }
+
+        function openEditIconModal(itemId) {
+            const item = htmlFiles.find(f => f.id === itemId);
+            if (!item) return;
+
+            document.getElementById('editIconShortcutId').value = item.id;
+            document.getElementById('editCustomIconUrl').value = item.customIcon || '';
+            document.getElementById('editIconModal').classList.remove('hidden');
+        }
+
+        function closeEditIconModal() {
+            document.getElementById('editIconModal').classList.add('hidden');
+        }
+
+        function saveCustomIcon() {
+            const id = document.getElementById('editIconShortcutId').value;
+            const newIcon = document.getElementById('editCustomIconUrl').value.trim();
+
+            const item = htmlFiles.find(f => f.id === id);
+            if (item) {
+                item.customIcon = newIcon;
+                saveToStorage();
+            }
+            closeEditIconModal();
+            render();
+        }
+
+        function deleteItem(itemId) {
+            const item = htmlFiles.find(f => f.id === itemId);
+            if (!item) return;
+
+            itemToDeleteId = itemId;
+            document.getElementById('deleteMessage').textContent = `Deseja remover o atalho "${item.title || item.name}"?`;
+            document.getElementById('confirmDeleteBtn').onclick = () => {
+                htmlFiles = htmlFiles.filter(f => f.id !== itemToDeleteId);
+                saveToStorage();
+                closeDeleteModal();
+                render();
+            };
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        async function exportBackup() {
+            const backupPayload = {
+                license: licensedTo,
+                shortcuts: htmlFiles,
+                categories: categoryCustomizations,
+                viewModes: categoryViewModes
+            };
+            const jsonStr = JSON.stringify(backupPayload, null, 2);
+            
+            const blob = new Blob([jsonStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", url);
+            downloadAnchor.setAttribute("download", "links.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function triggerImportBackup() {
+            document.getElementById('importFileInput').click();
+        }
+
+        function handleImportBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    let incoming = [];
+                    if (Array.isArray(importedData)) {
+                        incoming = importedData;
+                    } else if (importedData && Array.isArray(importedData.shortcuts)) {
+                        incoming = importedData.shortcuts;
+                        if (importedData.license) {
+                            licensedTo = importedData.license;
+                            localStorage.setItem('local_app_license', licensedTo);
+                            updateLicenseDisplay();
+                        }
+                        if (importedData.categories) {
+                            categoryCustomizations = {...categoryCustomizations, ...importedData.categories};
+                        }
+                        if (importedData.viewModes) {
+                            categoryViewModes = {...categoryViewModes, ...importedData.viewModes};
+                        }
+                    } else {
+                        alert('Formato inválido.');
+                        return;
+                    }
+                    
+                    let addedCount = 0;
+
+                    incoming.forEach(newItem => {
+                        htmlFiles.push({ 
+                            id: generateUniqueId(),
+                            ...newItem, 
+                            visitCount: newItem.visitCount || 0,
+                            isFavorite: newItem.isFavorite || false 
+                        });
+                        addedCount++;
+                    });
+
+                    saveToStorage();
+                    render();
+                    
+                    alert(`Backup importado com sucesso! (${addedCount} atalhos adicionados)`);
+                } catch (err) {
+                    alert('Erro ao ler o backup.');
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function confirmClearAllShortcuts() {
+            document.getElementById('deleteAllModal').classList.remove('hidden');
+        }
+        function closeDeleteAllModal() {
+            document.getElementById('deleteAllModal').classList.add('hidden');
+        }
+        function clearAllShortcuts() {
+            htmlFiles = [];
+            categoryCustomizations = {};
+            categoryViewModes = {};
+            currentCategory = 'all';
+            saveToStorage();
+            closeDeleteAllModal();
+            render();
+        }
+
+        function triggerFileSelect(inputId, previewContainerId = null) {
+            targetFileInputId = inputId;
+            targetFilePreviewId = previewContainerId;
+            document.getElementById('localFileInput').click();
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64String = e.target.result;
+                if (targetFileInputId) {
+                    const inputElement = document.getElementById(targetFileInputId);
+                    inputElement.value = base64String;
+                    if (targetFilePreviewId) {
+                        if (targetFileInputId === 'newCategoryIconClass') {
+                            updateCategoryIconPreview();
+                        } else {
+                            updateIconPreview();
+                        }
+                    }
+                }
+                event.target.value = '';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function pasteFromClipboard(inputId, previewContainerId = null) {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    const inputElement = document.getElementById(inputId);
+                    inputElement.value = text.trim();
+                    if (previewContainerId) {
+                        if (inputId === 'newCategoryIconClass') {
+                            updateCategoryIconPreview();
+                        } else {
+                            updateIconPreview();
+                        }
+                    }
+                }
+            } catch (err) {
+                alert('Erro ao ler a área de transferência.');
+            }
+        }
+
+        const availableCategoryIcons = [
+            { icon: 'fa-solid fa-house', color: 'text-amber-500' },
+            { icon: 'fa-solid fa-cart-shopping', color: 'text-emerald-500' },
+            { icon: 'fa-solid fa-brain', color: 'text-purple-500' },
+            { icon: 'fa-solid fa-newspaper', color: 'text-blue-500' },
+            { icon: 'fa-solid fa-video', color: 'text-red-500' },
+            { icon: 'fa-solid fa-briefcase', color: 'text-indigo-500' },
+            { icon: 'fa-solid fa-wrench', color: 'text-cyan-600' },
+            { icon: 'fa-solid fa-users', color: 'text-pink-500' },
+            { icon: 'fa-solid fa-star', color: 'text-amber-400' },
+            { icon: 'fa-solid fa-code', color: 'text-teal-600' },
+            { icon: 'fa-solid fa-envelope', color: 'text-sky-500' },
+            { icon: 'fa-solid fa-server', color: 'text-violet-600' },
+            { icon: 'fa-solid fa-cloud', color: 'text-blue-400' },
+            { icon: 'fa-solid fa-shield-halved', color: 'text-emerald-600' },
+            { icon: 'fa-solid fa-terminal', color: 'text-slate-700' },
+            { icon: 'fa-solid fa-laptop-code', color: 'text-indigo-600' },
+            { icon: 'fa-solid fa-database', color: 'text-blue-700' },
+            { icon: 'fa-solid fa-globe', color: 'text-cyan-500' },
+            { icon: 'fa-solid fa-book', color: 'text-orange-500' },
+            { icon: 'fa-solid fa-tag', color: 'text-rose-500' }
+        ];
+
+        const categoryKeywordMap = {
+            'geral': 0, 'home': 0,
+            'loja': 1, 'lojas': 1, 'ecommerce': 1, 'shop': 1, 'compras': 1,
+            'ia': 2, 'ai': 2, 'inteligência': 2,
+            'noticia': 3, 'notícias': 3, 'news': 3, 'blog': 3,
+            'canal': 4, 'canais': 4, 'video': 4, 'vídeos': 4, 'youtube': 4,
+            'trabalho': 5, 'work': 5, 'escritório': 5,
+            'ferramenta': 6, 'ferramentas': 6, 'utilitários': 6,
+            'social': 7, 'redes': 7, 'comunidade': 7,
+            'favorito': 8, 'favoritos': 8,
+            'desenvolvimento': 9, 'dev': 9, 'programação': 9, 'github': 9,
+            'email': 10, 'mail': 10, 'correio': 10,
+            'provedor': 11, 'host': 11, 'hospedagem': 11, 'servidor': 11,
+            'sistema': 12, 'admin': 12, 'painel': 12
+        };
+
+        function getCategoryIcon(catName) {
+            if (!catName) return 'fa-solid fa-folder text-blue-500';
+            
+            if (catName === 'most_visited') return 'fa-solid fa-fire text-amber-500';
+            if (catName === 'favorites') return 'fa-solid fa-star text-amber-400';
+
+            if (categoryCustomizations[catName] && categoryCustomizations[catName].icon) {
+                const icon = categoryCustomizations[catName].icon;
+                if (!icon.startsWith('http://') && !icon.startsWith('https://') && !icon.startsWith('data:')) {
+                    return icon;
+                }
+            }
+
+            const name = catName.trim().toLowerCase();
+            if (name === 'todos') return 'fa-solid fa-border-all text-blue-600';
+            
+            for (let keyword in categoryKeywordMap) {
+                if (name.includes(keyword)) {
+                    const index = categoryKeywordMap[keyword];
+                    const item = availableCategoryIcons[index];
+                    return `${item.icon} ${item.color}`;
+                }
+            }
+
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const positiveIndex = Math.abs(hash) % availableCategoryIcons.length;
+            const chosen = availableCategoryIcons[positiveIndex];
+            return `${chosen.icon} ${chosen.color}`;
+        }
+
+        function openEditCategoryModal(catName) {
+            document.getElementById('editCategoryOldName').value = catName;
+            document.getElementById('editCategoryNewName').value = catName;
+            document.getElementById('editCategoryIconClass').value = getCategoryIcon(catName);
+            document.getElementById('editCategoryModal').classList.remove('hidden');
+        }
+
+        function closeEditCategoryModal() {
+            document.getElementById('editCategoryModal').classList.add('hidden');
+        }
+
+        function handleEditCategorySubmit(e) {
+            e.preventDefault();
+            const oldName = document.getElementById('editCategoryOldName').value;
+            const newName = document.getElementById('editCategoryNewName').value.trim();
+            const newIcon = document.getElementById('editCategoryIconClass').value.trim();
+
+            if (!newName) return;
+
+            htmlFiles.forEach(item => {
+                if ((item.category || 'Geral').trim() === oldName) {
+                    item.category = newName;
+                }
+            });
+
+            categoryCustomizations[newName] = { icon: newIcon };
+            if (oldName !== newName && categoryCustomizations[oldName]) {
+                delete categoryCustomizations[oldName];
+            }
+
+            if (categoryViewModes[oldName]) {
+                categoryViewModes[newName] = categoryViewModes[oldName];
+                if (oldName !== newName) {
+                    delete categoryViewModes[oldName];
+                }
+            }
+
+            if (currentCategory === oldName) {
+                currentCategory = newName;
+            }
+
+            saveToStorage();
+            closeEditCategoryModal();
+            render();
+        }
+
+        function updateCategoryIconPreview() {
+            const val = document.getElementById('newCategoryIconClass').value.trim();
+            const container = document.getElementById('categoryIconPreviewContainer');
+            if (!val) {
+                container.innerHTML = '<i class="fa-solid fa-globe text-gray-400 text-sm" id="categoryPreviewPlaceholder"></i>';
+                return;
+            }
+            if (val.startsWith('fa-') || val.includes('fa-solid') || val.includes('fa-brands') || val.includes('fa-regular')) {
+                container.innerHTML = `<i class="${val} text-lg"></i>`;
+                return;
+            }
+            const resolved = resolveIconUrl(val, val);
+            container.innerHTML = `<img src="${resolved}" class="w-8 h-8 object-contain" onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fa-solid fa-image text-blue-500 text-sm\'></i>';">`;
+        }
+
+        function openEditCategoryIconModal(catName) {
+            document.getElementById('editCategoryIconName').value = catName;
+            const currentVal = (categoryCustomizations[catName] && categoryCustomizations[catName].icon) ? categoryCustomizations[catName].icon : '';
+            document.getElementById('newCategoryIconClass').value = currentVal;
+            updateCategoryIconPreview();
+            document.getElementById('editCategoryIconModal').classList.remove('hidden');
+        }
+
+        function closeEditCategoryIconModal() {
+            document.getElementById('editCategoryIconModal').classList.add('hidden');
+        }
+
+        function saveCategoryIcon() {
+            const catName = document.getElementById('editCategoryIconName').value;
+            const newIcon = document.getElementById('newCategoryIconClass').value.trim();
+            if (!categoryCustomizations[catName]) {
+                categoryCustomizations[catName] = {};
+            }
+            categoryCustomizations[catName].icon = newIcon;
+            saveToStorage();
+            closeEditCategoryIconModal();
+            render();
+        }
+
+        function openDeleteCategoryModal(catName) {
+            document.getElementById('deleteCategoryNameInput').value = catName;
+            document.getElementById('deleteCategoryMessage').textContent = `Deseja remover a categoria "${catName}"? Os atalhos dela serão movidos para "Geral".`;
+            document.getElementById('deleteCategoryModal').classList.remove('hidden');
+        }
+
+        function closeDeleteCategoryModal() {
+            document.getElementById('deleteCategoryModal').classList.add('hidden');
+        }
+
+        function confirmDeleteCategory() {
+            const catName = document.getElementById('deleteCategoryNameInput').value;
+            htmlFiles.forEach(item => {
+                if ((item.category || 'Geral').trim() === catName) {
+                    item.category = 'Geral';
+                }
+            });
+            if (categoryCustomizations[catName]) {
+                delete categoryCustomizations[catName];
+            }
+            if (categoryViewModes[catName]) {
+                delete categoryViewModes[catName];
+            }
+            if (currentCategory === catName) {
+                currentCategory = 'all';
+            }
+            saveToStorage();
+            closeDeleteCategoryModal();
+            render();
+        }
+
+        function applySidebarState() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const textElements = document.querySelectorAll('.sidebar-text');
+
+            if (window.innerWidth >= 768) {
+                if (sidebarOpen) {
+                    sidebar.classList.remove('md:w-16');
+                    sidebar.classList.add('md:w-64');
+                    textElements.forEach(el => el.classList.remove('md:hidden'));
+                } else {
+                    sidebar.classList.remove('md:w-64');
+                    sidebar.classList.add('md:w-16');
+                    textElements.forEach(el => el.classList.add('md:hidden'));
+                }
+                overlay.classList.add('hidden');
+            } else {
+                if (sidebarOpen) {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebar.classList.add('translate-x-0');
+                    overlay.classList.remove('hidden');
+                } else {
+                    sidebar.classList.remove('translate-x-0');
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.add('hidden');
+                }
+            }
+        }
+
+        function expandSidebar() { if(window.innerWidth >= 768) { sidebarOpen = true; applySidebarState(); } }
+        function collapseSidebar() { sidebarOpen = false; applySidebarState(); }
+        function toggleMobileSidebar() { sidebarOpen = !sidebarOpen; applySidebarState(); }
+
+        const searchInputs = document.querySelectorAll('.search-input');
+        const clearBtns = document.querySelectorAll('.clear-search-btn');
+        
+        searchInputs.forEach(input => {
+            input.addEventListener('input', e => {
+                searchQuery = e.target.value.toLowerCase();
+                searchInputs.forEach(inp => inp.value = e.target.value);
+                clearBtns.forEach(btn => btn.classList.toggle('hidden', searchQuery.length === 0));
+                renderGrid();
+            });
+        });
+
+        function clearSearch() { 
+            searchQuery = ''; 
+            searchInputs.forEach(inp => inp.value = '');
+            clearBtns.forEach(btn => btn.classList.add('hidden')); 
+            renderGrid(); 
+        }
+
+        function getViewMode(cat) {
+            return categoryViewModes[cat] || 'grid';
+        }
+
+        function setViewMode(mode) {
+            if (currentCategory === 'all') {
+                categoryViewModes['all'] = mode;
+                categoryViewModes['favorites'] = mode;
+                categoryViewModes['most_visited'] = mode;
+                const uniqueCategories = new Set(htmlFiles.map(s => (s.category || 'Geral').trim()));
+                Object.keys(categoryCustomizations).forEach(cat => uniqueCategories.add(cat.trim()));
+                uniqueCategories.forEach(cat => {
+                    categoryViewModes[cat] = mode;
+                });
+            } else {
+                categoryViewModes[currentCategory] = mode;
+            }
+            saveToStorage();
+            renderGrid();
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            saveToStorage();
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.className = 'cat-btn flex items-center justify-between px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-100 w-full group/cat';
+            });
+            const safeId = 'cat-' + btoa(unescape(encodeURIComponent(cat))).replace(/=/g, '');
+            const activeBtn = document.getElementById(safeId);
+            if(activeBtn) {
+                activeBtn.className = 'cat-btn flex items-center justify-between px-3 py-2 rounded-md text-sm bg-blue-50 text-blue-700 font-medium w-full group/cat';
+            }
+            renderGrid();
+            if (window.innerWidth < 768) collapseSidebar();
+        }
+
+        function renderCategories() {
+            const categoryList = document.getElementById('categoryList');
+            const categorySuggestions = document.getElementById('categorySuggestions');
+            const counts = {};
+            const uniqueCategories = new Set();
+            
+            htmlFiles.forEach(s => {
+                const cat = (s.category || 'Geral').trim();
+                counts[cat] = (counts[cat] || 0) + 1;
+                uniqueCategories.add(cat);
+            });
+
+            Object.keys(categoryCustomizations).forEach(cat => {
+                if (cat) uniqueCategories.add(cat.trim());
+            });
+
+            categorySuggestions.innerHTML = Array.from(uniqueCategories).sort().map(cat => `<option value="${cat}">`).join('');
+            categoryList.innerHTML = '';
+
+            // Categoria Favoritos
+            const favoritesSelected = currentCategory === 'favorites';
+            const favoritesCount = htmlFiles.filter(s => !!s.isFavorite).length;
+            const favoritesBtn = document.createElement('button');
+            favoritesBtn.id = 'cat-' + btoa('favorites').replace(/=/g, '');
+            favoritesBtn.onclick = () => filterCategory('favorites');
+            favoritesBtn.title = 'Favoritos';
+            favoritesBtn.className = `cat-btn flex items-center justify-between px-3 py-2 rounded-md text-sm w-full group/cat ${favoritesSelected ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`;
+            favoritesBtn.innerHTML = `
+                <span class="flex items-center gap-2 truncate">
+                    <i class="fa-solid fa-star shrink-0 text-amber-400"></i> 
+                    <span class="sidebar-text md:hidden truncate">Favoritos</span>
+                </span>
+                <div class="flex items-center gap-1">
+                    <span class="sidebar-text md:hidden text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full shrink-0">${favoritesCount}</span>
+                </div>
+            `;
+            categoryList.appendChild(favoritesBtn);
+
+            // Categoria Mais Visitados
+            const mostVisitedSelected = currentCategory === 'most_visited';
+            const mostVisitedCount = htmlFiles.filter(s => (s.visitCount || 0) > 0).length;
+            const mostVisitedBtn = document.createElement('button');
+            mostVisitedBtn.id = 'cat-' + btoa('most_visited').replace(/=/g, '');
+            mostVisitedBtn.onclick = () => filterCategory('most_visited');
+            mostVisitedBtn.title = 'Mais Visitados';
+            mostVisitedBtn.className = `cat-btn flex items-center justify-between px-3 py-2 rounded-md text-sm w-full group/cat ${mostVisitedSelected ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`;
+            mostVisitedBtn.innerHTML = `
+                <span class="flex items-center gap-2 truncate">
+                    <i class="fa-solid fa-fire shrink-0 text-amber-500"></i> 
+                    <span class="sidebar-text md:hidden truncate">Mais Visitados</span>
+                </span>
+                <div class="flex items-center gap-1">
+                    <span class="sidebar-text md:hidden text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full shrink-0">${mostVisitedCount}</span>
+                </div>
+            `;
+            categoryList.appendChild(mostVisitedBtn);
+
+            // Categoria Todos
+            const allSelected = currentCategory === 'all';
+            const allBtn = document.createElement('button');
+            allBtn.id = 'cat-all';
+            allBtn.onclick = () => filterCategory('all');
+            allBtn.title = 'Todos';
+            allBtn.className = `cat-btn flex items-center justify-between px-3 py-2 rounded-md text-sm w-full group/cat ${allSelected ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`;
+            allBtn.innerHTML = `
+                <span class="flex items-center gap-2 truncate">
+                    <i class="fa-solid fa-border-all shrink-0 text-blue-600"></i> 
+                    <span class="sidebar-text md:hidden truncate">Todos</span>
+                </span>
+                <div class="flex items-center gap-1">
+                    <span class="sidebar-text md:hidden text-xs bg-blue-200/60 text-blue-800 px-2 py-0.5 rounded-full shrink-0">${htmlFiles.length}</span>
+                </div>
+            `;
+            categoryList.appendChild(allBtn);
+
+            const categoryArray = Array.from(uniqueCategories).sort();
+            const totalCategories = categoryArray.length;
+
+            categoryArray.forEach((cat, catIndex) => {
+                const isSelected = currentCategory === cat;
+                const safeId = 'cat-' + btoa(unescape(encodeURIComponent(cat))).replace(/=/g, '');
+                const catMenuId = `actionMenuCategory_${catIndex}`;
+                
+                const isNearBottomCat = catIndex >= totalCategories - 2;
+                const catMenuPositionClass = isNearBottomCat ? 'absolute right-0 bottom-full mb-1' : 'absolute right-0 top-full mt-1';
+                
+                let iconMarkup = '';
+                const customIcon = categoryCustomizations[cat] && categoryCustomizations[cat].icon ? categoryCustomizations[cat].icon : '';
+                if (customIcon && (customIcon.startsWith('http://') || customIcon.startsWith('https://') || customIcon.startsWith('data:'))) {
+                    iconMarkup = `<img src="${customIcon}" class="w-4 h-4 object-contain shrink-0" onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fa-solid fa-folder text-blue-500 shrink-0\'></i>';">`;
+                } else {
+                    const iconClasses = getCategoryIcon(cat);
+                    iconMarkup = `<i class="${iconClasses} shrink-0"></i>`;
+                }
+                
+                const btn = document.createElement('button');
+                btn.id = safeId;
+                btn.onclick = () => filterCategory(cat);
+                btn.title = cat;
+                btn.className = `cat-btn flex items-center justify-between px-3 py-2 rounded-md text-sm w-full group/cat ${isSelected ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'}`;
+                
+                btn.innerHTML = `
+                    <span class="flex items-center gap-2 truncate flex-1 min-w-0">
+                        ${iconMarkup}
+                        <span class="sidebar-text md:hidden truncate">${cat}</span>
+                    </span>
+                    <div class="flex items-center gap-1 shrink-0 relative action-menu-container">
+                        <span class="sidebar-text md:hidden text-xs bg-gray-200/70 text-gray-600 px-2 py-0.5 rounded-full">${counts[cat] || 0}</span>
+                        <button onclick="toggleActionMenu(event, '${catMenuId}')" title="Ações" class="sidebar-text md:hidden p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors">
+                            <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                        </button>
+                        <div id="${catMenuId}" class="action-menu-dropdown ${catMenuPositionClass} w-36 bg-white border border-gray-200 rounded-md shadow-xl hidden z-50 py-1 text-left">
+                            <button onclick="event.stopPropagation(); openEditCategoryModal('${cat.replace(/'/g, "\\'")}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                <i class="fa-solid fa-pen text-blue-500"></i> Editar
+                            </button>
+                            <button onclick="event.stopPropagation(); openEditCategoryIconModal('${cat.replace(/'/g, "\\'")}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                <i class="fa-solid fa-image text-gray-400"></i> Alterar Ícone
+                            </button>
+                            <button onclick="event.stopPropagation(); openDeleteCategoryModal('${cat.replace(/'/g, "\\'")}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100 flex items-center gap-2">
+                                <i class="fa-solid fa-trash text-red-500"></i> Remover
+                            </button>
+                        </div>
+                    </div>
+                `;
+                categoryList.appendChild(btn);
+            });
+            
+            applySidebarState();
+        }
+
+        function renderHeaderSummary(filteredCount, isSearchResult = false) {
+            const titleEl = document.getElementById('currentCategoryTitle');
+            const countEl = document.getElementById('currentCategoryCount');
+            
+            let iconMarkup = '<i class="fa-solid fa-border-all text-blue-600"></i>';
+            let catName = 'Todos os Atalhos';
+
+            if (isSearchResult) {
+                catName = 'Resultados da busca';
+                iconMarkup = '<i class="fa-solid fa-magnifying-glass text-blue-600"></i>';
+            } else if (currentCategory === 'favorites') {
+                catName = 'Favoritos';
+                iconMarkup = '<i class="fa-solid fa-star text-amber-400"></i>';
+            } else if (currentCategory === 'most_visited') {
+                catName = 'Mais Visitados';
+                iconMarkup = '<i class="fa-solid fa-fire text-amber-500"></i>';
+            } else if (currentCategory !== 'all') {
+                catName = currentCategory;
+                const customIcon = categoryCustomizations[currentCategory] && categoryCustomizations[currentCategory].icon ? categoryCustomizations[currentCategory].icon : '';
+                if (customIcon && (customIcon.startsWith('http://') || customIcon.startsWith('https://') || customIcon.startsWith('data:'))) {
+                    iconMarkup = `<img src="${customIcon}" class="w-4 h-4 object-contain inline-block" onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fa-solid fa-folder text-blue-500\'></i>';">`;
+                } else {
+                    const iconClasses = getCategoryIcon(currentCategory);
+                    iconMarkup = `<i class="${iconClasses}"></i>`;
+                }
+            }
+
+            if (titleEl) {
+                titleEl.innerHTML = `${iconMarkup} <span>${catName}</span>`;
+            }
+            if (countEl) {
+                countEl.textContent = `${filteredCount} ${filteredCount === 1 ? 'item' : 'itens'}`;
+            }
+        }
+
+        function render() {
+            applySidebarState();
+            renderCategories();
+            renderGrid();
+            updateLicenseDisplay();
+        }
+
+        function resolveIconUrl(inputUrl, shortcutFile) {
+            if (!inputUrl) {
+                try {
+                    if (shortcutFile.startsWith('http://') || shortcutFile.startsWith('https://')) {
+                        const domain = new URL(shortcutFile).hostname;
+                        return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+                    }
+                } catch (e) {}
+                return null;
+            }
+            return inputUrl;
+        }
+
+        function updateIconPreview() {
+            const val = document.getElementById('customIconUrl').value.trim();
+            const container = document.getElementById('iconPreviewContainer');
+            if (!val) {
+                container.innerHTML = '<i class="fa-solid fa-globe text-gray-400 text-sm" id="previewPlaceholder"></i>';
+                return;
+            }
+            const resolved = resolveIconUrl(val, val);
+            container.innerHTML = `<img src="${resolved}" class="w-8 h-8 object-contain" onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fa-solid fa-image text-blue-500 text-sm\'></i>';">`;
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('shortcutsGrid');
+            const list = document.getElementById('shortcutsList');
+            const empty = document.getElementById('emptyState');
+            const viewMode = getViewMode(currentCategory);
+            
+            let filtered = [];
+            let isSearchResult = false;
+
+            if (searchQuery.length > 0) {
+                const globalMatches = htmlFiles.filter(s => 
+                    (s.title && s.title.toLowerCase().includes(searchQuery)) || 
+                    (s.name && s.name.toLowerCase().includes(searchQuery))
+                );
+
+                if (globalMatches.length > 0) {
+                    filtered = globalMatches;
+                    isSearchResult = true;
+                } else {
+                    let categoryItems = [];
+                    if (currentCategory === 'favorites') {
+                        categoryItems = htmlFiles.filter(s => !!s.isFavorite);
+                    } else if (currentCategory === 'most_visited') {
+                        categoryItems = htmlFiles.filter(s => (s.visitCount || 0) > 0);
+                    } else if (currentCategory === 'all') {
+                        categoryItems = htmlFiles;
+                    } else {
+                        categoryItems = htmlFiles.filter(s => (s.category || 'Geral').trim() === currentCategory);
+                    }
+
+                    filtered = categoryItems.filter(s => 
+                        (s.title && s.title.toLowerCase().includes(searchQuery)) || 
+                        (s.name && s.name.toLowerCase().includes(searchQuery))
+                    );
+                }
+            } else {
+                if (currentCategory === 'favorites') {
+                    filtered = htmlFiles.filter(s => !!s.isFavorite);
+                } else if (currentCategory === 'most_visited') {
+                    filtered = htmlFiles.filter(s => (s.visitCount || 0) > 0);
+                } else {
+                    filtered = htmlFiles.filter(s => {
+                        const itemCat = (s.category || 'Geral').trim();
+                        return currentCategory === 'all' || itemCat === currentCategory;
+                    });
+                }
+            }
+
+            // Ordenação: Se for "Mais Visitados", ordena por contagem de visitas. Caso contrário, ordena por ordem alfabética.
+            if (currentCategory === 'most_visited' && !isSearchResult) {
+                filtered.sort((a, b) => (b.visitCount || 0) - (a.visitCount || 0));
+            } else {
+                filtered.sort((a, b) => {
+                    const titleA = (a.title || a.name || '').toLowerCase();
+                    const titleB = (b.title || b.name || '').toLowerCase();
+                    return titleA.localeCompare(titleB, 'pt');
+                });
+            }
+
+            renderHeaderSummary(filtered.length, isSearchResult);
+
+            if (filtered.length === 0) {
+                grid.classList.add('hidden'); 
+                list.classList.add('hidden');
+                empty.classList.remove('hidden'); 
+                return;
+            }
+            
+            empty.classList.add('hidden');
+
+            if (viewMode === 'grid') {
+                list.classList.add('hidden');
+                grid.classList.remove('hidden');
+
+                grid.innerHTML = filtered.map((item, index) => {
+                    const targetUrl = item.file || item.name;
+                    const iconUrl = resolveIconUrl(item.customIcon, targetUrl);
+                    const menuId = `actionMenuGrid_${index}`;
+                    
+                    let iconMarkup = iconUrl ? 
+                        `<img src="${iconUrl}" alt="" class="w-8 h-8 object-contain drop-shadow-sm group-hover:scale-105 transition-transform" onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fa-solid fa-globe text-3xl text-blue-500\'></i>';">` :
+                        `<i class="fa-brands fa-html5 text-4xl text-orange-600 drop-shadow-sm group-hover:scale-105 transition-transform"></i>`;
+
+                    const gridMenuPosClass = "top-full mt-1 right-0";
+                    const isFav = !!item.isFavorite;
+
+                    return `
+                        <div class="group relative flex flex-col items-center justify-center p-3 rounded-lg transition-all cursor-pointer text-center bg-white border border-gray-200/80 hover:border-blue-300 hover:shadow-sm"
+                             onclick="openShortcut('${targetUrl}', '${item.id}')" title="${item.title || item.name}">
+                            
+                            <button onclick="toggleFavorite(event, '${item.id}')" title="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}" class="absolute top-1 left-1 p-1 text-gray-300 hover:text-amber-400 transition-colors z-10">
+                                <i class="fa-solid fa-star text-xs ${isFav ? 'text-amber-400' : ''}"></i>
+                            </button>
+
+                            <div class="w-12 h-12 mb-2 flex items-center justify-center">
+                                ${iconMarkup}
+                            </div>
+                            <span class="text-xs text-gray-700 line-clamp-2 w-full px-1 group-hover:text-blue-600 font-medium">${item.title || item.name}</span>
+                            
+                            <div class="absolute top-1 right-1 action-menu-container z-10">
+                                <button onclick="toggleActionMenu(event, '${menuId}')" title="Ações" class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors">
+                                    <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                                </button>
+                                <div id="${menuId}" class="action-menu-dropdown absolute ${gridMenuPosClass} w-36 bg-white border border-gray-200 rounded-md shadow-lg hidden z-50 py-1 text-left">
+                                    <button onclick="event.stopPropagation(); openEditShortcutModal('${item.id}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                        <i class="fa-solid fa-pen text-blue-500"></i> Editar
+                                    </button>
+                                    <button onclick="event.stopPropagation(); openEditIconModal('${item.id}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                        <i class="fa-solid fa-image text-gray-400"></i> Alterar Ícone
+                                    </button>
+                                    <button onclick="event.stopPropagation(); deleteItem('${item.id}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100 flex items-center gap-2">
+                                        <i class="fa-solid fa-trash text-red-500"></i> Remover
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                grid.classList.add('hidden');
+                list.classList.remove('hidden');
+
+                const totalItems = filtered.length;
+
+                list.innerHTML = filtered.map((item, index) => {
+                    const targetUrl = item.file || item.name;
+                    const iconUrl = resolveIconUrl(item.customIcon, targetUrl);
+                    const menuId = `actionMenuList_${index}`;
+                    
+                    const isNearBottom = index >= totalItems - 2;
+                    const menuPositionClass = isNearBottom ? 'absolute right-0 bottom-full mb-1' : 'absolute right-0 top-full mt-1';
+                    const isFav = !!item.isFavorite;
+
+                    let iconMarkup = iconUrl ? 
+                        `<img src="${iconUrl}" alt="" class="w-5 h-5 object-contain" onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fa-solid fa-globe text-blue-500\'></i>';">` :
+                        `<i class="fa-brands fa-html5 text-lg text-orange-600"></i>`;
+
+                    return `
+                        <div class="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 border-b border-gray-100 last:border-none cursor-pointer transition-colors relative"
+                             onclick="openShortcut('${targetUrl}', '${item.id}')" title="${item.title || item.name}">
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <button onclick="toggleFavorite(event, '${item.id}')" title="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}" class="p-1 text-gray-300 hover:text-amber-400 transition-colors">
+                                    <i class="fa-solid fa-star text-sm ${isFav ? 'text-amber-400' : ''}"></i>
+                                </button>
+                                <div class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-md shrink-0">
+                                    ${iconMarkup}
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium text-gray-800 truncate">${item.title || item.name}</p>
+                                    <p class="text-xs text-gray-400 truncate">${targetUrl}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0 action-menu-container">
+                                <button onclick="toggleActionMenu(event, '${menuId}')" title="Ações" class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors">
+                                    <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                                </button>
+                                <div id="${menuId}" class="action-menu-dropdown ${menuPositionClass} w-36 bg-white border border-gray-200 rounded-md shadow-lg hidden z-50 py-1 text-left">
+                                    <button onclick="event.stopPropagation(); openEditShortcutModal('${item.id}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                        <i class="fa-solid fa-pen text-blue-500"></i> Editar
+                                    </button>
+                                    <button onclick="event.stopPropagation(); openEditIconModal('${item.id}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                        <i class="fa-solid fa-image text-gray-400"></i> Alterar Ícone
+                                    </button>
+                                    <button onclick="event.stopPropagation(); deleteItem('${item.id}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100 flex items-center gap-2">
+                                        <i class="fa-solid fa-trash text-red-500"></i> Remover
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Inicialização
+        window.onload = function() {
+            render();
+        };
+    </script>
+    
+      <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('Service Worker Registrado com Sucesso!'))
+      .catch(err => console.log('Erro ao registrar Service Worker:', err));
+  }
+</script>
+    
+</body>
+</html>
