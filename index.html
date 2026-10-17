@@ -921,58 +921,65 @@
             document.getElementById('importFileInput').click();
         }
 
-        function handleImportBackup(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+       function handleImportBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    let incoming = [];
-                    if (Array.isArray(importedData)) {
-                        incoming = importedData;
-                    } else if (importedData && Array.isArray(importedData.shortcuts)) {
-                        incoming = importedData.shortcuts;
-                        if (importedData.license) {
-                            licensedTo = importedData.license;
-                            localStorage.setItem('local_app_license', licensedTo);
-                            updateLicenseDisplay();
-                        }
-                        if (importedData.categories) {
-                            categoryCustomizations = {...categoryCustomizations, ...importedData.categories};
-                        }
-                        if (importedData.viewModes) {
-                            categoryViewModes = {...categoryViewModes, ...importedData.viewModes};
-                        }
-                    } else {
-                        alert('Formato inválido.');
-                        return;
-                    }
-                    
-                    let addedCount = 0;
-
-                    incoming.forEach(newItem => {
-                        htmlFiles.push({ 
-                            id: generateUniqueId(),
-                            ...newItem, 
-                            visitCount: newItem.visitCount || 0,
-                            isFavorite: newItem.isFavorite || false 
-                        });
-                        addedCount++;
-                    });
-
-                    saveToStorage();
-                    render();
-                    
-                    alert(`Backup importado com sucesso! (${addedCount} atalhos adicionados)`);
-                } catch (err) {
-                    alert('Erro ao ler o backup.');
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            let incoming = [];
+            if (Array.isArray(importedData)) {
+                incoming = importedData;
+            } else if (importedData && Array.isArray(importedData.shortcuts)) {
+                incoming = importedData.shortcuts;
+                if (importedData.license) {
+                    licensedTo = importedData.license;
+                    localStorage.setItem('local_app_license', licensedTo);
+                    updateLicenseDisplay();
                 }
-                event.target.value = '';
-            };
-            reader.readAsText(file);
+                if (importedData.categories) {
+                    categoryCustomizations = {...categoryCustomizations, ...importedData.categories};
+                }
+                if (importedData.viewModes) {
+                    categoryViewModes = {...categoryViewModes, ...importedData.viewModes};
+                }
+            } else {
+                alert('Formato inválido.');
+                return;
+            }
+            
+            let addedCount = 0;
+
+            incoming.forEach(newItem => {
+                htmlFiles.push({ 
+                    id: newItem.id || generateUniqueId(),
+                    ...newItem, 
+                    visitCount: newItem.visitCount || 0,
+                    isFavorite: newItem.isFavorite || false 
+                });
+                addedCount++;
+            });
+
+            // 1. Salva localmente
+            saveToStorage();
+            render();
+            
+            // 2. Envia explicitamente para a Planilha do Google
+            if (typeof syncToGoogleSheets === 'function') {
+                await syncToGoogleSheets();
+            }
+
+            alert(`Backup importado e sincronizado com o Google Sheets com sucesso! (${addedCount} atalhos adicionados)`);
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao ler o backup.');
         }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+}
 
         function confirmClearAllShortcuts() {
             document.getElementById('deleteAllModal').classList.remove('hidden');
