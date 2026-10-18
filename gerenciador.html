@@ -196,21 +196,17 @@
         </form>
     </div>
 
-    <!-- Campo de Busca de Usuário (Posicionado ANTES da lista) -->
+    <!-- Campo de Busca de Usuário (Por Nome) -->
     <div class="card">
-        <h2>Buscar Usuário</h2>
+        <h2>Buscar por Nome do Usuário</h2>
         <div class="form-grid">
             <div class="form-group full-width">
-                <label for="buscaEmail">Digite o e-mail ou nome para filtrar/buscar</label>
-                <input type="text" id="buscaEmail" placeholder="Digite para buscar..." oninput="filtrarETestarBusca()">
+                <label for="buscaNome">Digite o nome do usuário para filtrar</label>
+                <input type="text" id="buscaNome" placeholder="Digite o nome..." oninput="filtrarTabelaPorNome()">
             </div>
         </div>
         <div class="btn-group">
-            <button type="button" class="btn-primary" onclick="filtrarETestarBusca()">Buscar</button>
             <button type="button" class="btn-secondary" onclick="limparBusca()">Limpar Busca</button>
-        </div>
-        <div style="margin-top: 1rem;">
-            <pre id="resultadoBusca">Digite um e-mail acima para ver os detalhes em JSON da função azlinksBuscarUsuario.</pre>
         </div>
     </div>
 
@@ -230,3 +226,114 @@
             </thead>
             <tbody>
                 <!-- Preenchido via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Importa o arquivo usuarios.js -->
+<script src="usuarios.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        atualizarTabela();
+    });
+
+    const form = document.getElementById('formUsuario');
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const nome = document.getElementById('nome').value.trim();
+        const planilhaInput = document.getElementById('planilha').value.trim();
+        const validade = document.getElementById('validade').value.trim();
+
+        const idPlanilha = typeof azlinksExtrairId === 'function' 
+            ? azlinksExtrairId(planilhaInput) 
+            : planilhaInput;
+
+        USUARIOS[email] = [nome, idPlanilha, validade];
+
+        atualizarTabela();
+        limparFormulario();
+    });
+
+    function limparFormulario() {
+        form.reset();
+    }
+
+    function removerUsuario(email) {
+        if (confirm(`Deseja remover o usuário ${email}?`)) {
+            delete USUARIOS[email];
+            atualizarTabela();
+        }
+    }
+
+    function editarUsuario(email) {
+        const dados = USUARIOS[email];
+        if (!dados) return;
+
+        document.getElementById('email').value = email;
+        document.getElementById('nome').value = dados[0] || '';
+        document.getElementById('planilha').value = dados[1] || '';
+        document.getElementById('validade').value = dados[2] || '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function atualizarTabela(filtroNome = '') {
+        const tbody = document.querySelector('#tabelaUsuarios tbody');
+        tbody.innerHTML = '';
+
+        const termo = filtroNome.trim().toLowerCase();
+        let emails = Object.keys(USUARIOS);
+
+        if (termo) {
+            emails = emails.filter(email => {
+                const nome = String(USUARIOS[email][0] || '').toLowerCase();
+                return nome.includes(termo); // Filtra especificamente pelo nome
+            });
+        }
+
+        if (emails.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum usuário encontrado.</td></tr>';
+            return;
+        }
+
+        emails.forEach(email => {
+            const [nome, idPlanilha, validade] = USUARIOS[email];
+            const vencida = typeof azlinksLicencaVencida === 'function' ? azlinksLicencaVencida(validade) : false;
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${email}</td>
+                <td>${nome}</td>
+                <td><code>${idPlanilha}</code></td>
+                <td>${validade || '<em>Sem vencimento</em>'}</td>
+                <td>
+                    <span class="badge ${vencida ? 'badge-expired' : 'badge-active'}">
+                        ${vencida ? 'Vencida/Inválida' : 'Ativa'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn-secondary" onclick="editarUsuario('${email}')" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Editar</button>
+                    <button class="btn-danger" onclick="removerUsuario('${email}')">Excluir</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filtrarTabelaPorNome() {
+        const termo = document.getElementById('buscaNome').value;
+        atualizarTabela(termo);
+    }
+
+    function limparBusca() {
+        document.getElementById('buscaNome').value = '';
+        atualizarTabela();
+    }
+</script>
+
+</body>
+</html>
