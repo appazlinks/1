@@ -236,6 +236,16 @@
     <input type="file" id="localFileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
     <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="handleImportBackup(event)">
     <input type="file" id="shortcutIconFileInput" accept="image/*" class="hidden" onchange="handleShortcutIconFileSelect(event)">
+    <input type="file" id="categoryIconFileInput" accept="image/*" class="hidden" onchange="handleCategoryIconFileSelect(event)">
+
+    <!-- Tela de licença vencida: cobre todo o aplicativo e não pode ser fechada -->
+    <div id="licenseBlock" class="fixed inset-0 bg-white z-[70] hidden flex items-center justify-center p-6">
+        <div class="w-full max-w-md border-2 border-red-500 rounded-lg p-6 flex flex-col items-center text-center gap-4">
+            <i class="fa-solid fa-lock text-red-500 text-4xl"></i>
+            <p id="licenseBlockMessage" class="text-red-600 font-semibold text-lg leading-snug"></p>
+            <button type="button" onclick="useAnotherEmail()" class="mt-2 px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Entrar com outro e-mail</button>
+        </div>
+    </div>
 
     <!-- Modal de acesso por e-mail -->
     <div id="emailModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
@@ -357,6 +367,12 @@
             </div>
             <div class="p-5 flex flex-col gap-4">
                 <input type="hidden" id="editCategoryIconName">
+                <button type="button" onclick="triggerCategoryIconFile()" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center justify-center gap-2 text-gray-700 cursor-pointer">
+                    <i class="fa-solid fa-image text-blue-600 pointer-events-none"></i> Escolher imagem (galeria ou pasta)
+                </button>
+                <div class="flex items-center gap-2 text-[11px] text-gray-400 uppercase">
+                    <span class="flex-1 border-t border-gray-200"></span>ou<span class="flex-1 border-t border-gray-200"></span>
+                </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Classe FontAwesome do Ícone</label>
                     <input type="text" id="newCategoryIconClass" placeholder="Ex: fa-solid fa-brain text-purple-500" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -387,7 +403,8 @@
     </div>
 
     <!-- Cadastro de e-mails e URLs do Apps Script (mesma pasta do index.html) -->
-    <script src="usuarios.js"></script>
+    <!-- O "?t=" evita que o navegador use uma versão antiga em cache do usuarios.js -->
+    <script>document.write('<script src="usuarios.js?t=' + Date.now() + '"><\/script>');</script>
     <script>
         // URL do Apps Script do usuário logado. É definida automaticamente a partir do e-mail
         // cadastrado em usuarios.js. Se ficar vazia ou com o texto de exemplo, a sincronização é desativada.
@@ -399,6 +416,22 @@
 
         function isSyncConfigured() {
             return !!APPS_SCRIPT_URL && APPS_SCRIPT_URL !== APPS_SCRIPT_URL_PLACEHOLDER;
+        }
+
+        // Garante que o link tenha protocolo (ex.: "google.com" vira "https://google.com")
+        function normalizeUrl(value) {
+            const v = String(value || '').trim();
+            if (!v) return '';
+            return /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v) ? v : 'https://' + v;
+        }
+
+        // Ícone do site; não quebra a tela se o link for inválido
+        function getFaviconUrl(targetUrl) {
+            try {
+                return `https://www.google.com/s2/favicons?domain=${new URL(targetUrl).hostname}&sz=128`;
+            } catch (err) {
+                return 'https://via.placeholder.com/32';
+            }
         }
 
         function generateUniqueId() {
@@ -673,8 +706,18 @@
             }
 
             titleEl.innerHTML = '';
-            const icon = document.createElement('i');
-            icon.className = iconClass;
+            const custom = categoryCustomizations[currentCategory];
+            const isSystemCat = ['all', 'favorites', 'most_visited'].includes(currentCategory);
+            let icon;
+            if (!isSystemCat && custom && custom.image) {
+                icon = document.createElement('img');
+                icon.src = custom.image;
+                icon.alt = '';
+                icon.className = 'w-4 h-4 object-contain rounded';
+            } else {
+                icon = document.createElement('i');
+                icon.className = iconClass;
+            }
             titleEl.appendChild(icon);
             titleEl.appendChild(document.createTextNode(' ' + label));
         }
@@ -799,9 +842,15 @@
                     actionMenuHtml = `<span class="sidebar-text md:hidden text-xs bg-gray-200/70 px-2 py-0.5 rounded-full">${count}</span>`;
                 }
 
+                // Categoria com imagem própria (escolhida na galeria/pasta) usa a imagem no lugar do ícone
+                const customImage = (!isSystem && categoryCustomizations[catVal] && categoryCustomizations[catVal].image) || '';
+                const iconHtml = customImage
+                    ? `<img src="${customImage}" alt="" class="w-4 h-4 object-contain rounded shrink-0 pointer-events-none">`
+                    : `<i class="${iconClass} shrink-0 pointer-events-none"></i>`;
+
                 btn.innerHTML = `
                     <span class="flex items-center gap-2 truncate flex-1 min-w-0 pointer-events-none">
-                        <i class="${iconClass} shrink-0 pointer-events-none"></i>
+                        ${iconHtml}
                         <span class="sidebar-text md:hidden truncate pointer-events-none">${label}</span>
                     </span>
                     ${actionMenuHtml}
@@ -844,9 +893,15 @@
                 }
             });
 
-            if (newIcon) {
+            // Se a categoria tem imagem própria e o campo do ícone não foi alterado, mantém a imagem (mesmo renomeando)
+            const oldCustom = categoryCustomizations[oldName];
+            const iconChanged = newIcon !== getCategoryIcon(oldName);
+            if (oldCustom && oldCustom.image && !iconChanged) {
+                categoryCustomizations[newName] = { ...oldCustom };
+            } else if (newIcon) {
                 categoryCustomizations[newName] = { icon: newIcon };
             }
+            if (newName !== oldName) delete categoryCustomizations[oldName];
 
             if (currentCategory === oldName) currentCategory = newName;
             saveToStorage();
@@ -860,6 +915,47 @@
             document.getElementById('editCategoryIconModal').classList.remove('hidden');
         }
 
+        // Abre a galeria do celular ou o seletor de arquivos do computador
+        function triggerCategoryIconFile() {
+            document.getElementById('categoryIconFileInput').click();
+        }
+
+        // Lê a imagem escolhida, reduz para 96x96 (economiza espaço) e aplica na categoria
+        function handleCategoryIconFileSelect(e) {
+            const input = e.target;
+            const file = input.files[0];
+            const catName = document.getElementById('editCategoryIconName').value;
+            if (!file || !catName) { input.value = ''; return; }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const size = 96;
+                    const iw = img.naturalWidth || size;
+                    const ih = img.naturalHeight || size;
+                    const scale = Math.min(size / iw, size / ih);
+                    const w = iw * scale, h = ih * scale;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    canvas.getContext('2d').drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+
+                    categoryCustomizations[catName] = { image: canvas.toDataURL('image/png') };
+                    saveToStorage(false);
+                    closeEditCategoryIconModal();
+                    render();
+                    input.value = '';
+                };
+                img.onerror = function() {
+                    alert('Não foi possível ler esta imagem. Escolha outro arquivo.');
+                    input.value = '';
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
         function closeEditCategoryIconModal() {
             document.getElementById('editCategoryIconModal').classList.add('hidden');
         }
@@ -868,7 +964,15 @@
             const catName = document.getElementById('editCategoryIconName').value;
             const newIcon = document.getElementById('newCategoryIconClass').value.trim();
 
+            // Se já há uma imagem escolhida e a classe do ícone não foi alterada, mantém a imagem
+            const current = categoryCustomizations[catName];
+            if (catName && current && current.image && newIcon === getCategoryIcon(catName)) {
+                closeEditCategoryIconModal();
+                return;
+            }
+
             if (catName && newIcon) {
+                // Digitar uma classe de ícone substitui a imagem anterior
                 categoryCustomizations[catName] = { icon: newIcon };
                 saveToStorage();
                 render();
@@ -923,7 +1027,7 @@
                 grid.classList.remove('hidden');
                 grid.innerHTML = filtered.map((item, index) => {
                     const targetUrl = item.file || item.name;
-                    const iconUrl = item.customIcon || `https://www.google.com/s2/favicons?domain=${new URL(targetUrl).hostname}&sz=128`;
+                    const iconUrl = item.customIcon || getFaviconUrl(targetUrl);
                     const menuId = `actionMenuGrid_${index}`;
                     const isFav = !!item.isFavorite;
 
@@ -958,7 +1062,7 @@
                 list.classList.remove('hidden');
                 list.innerHTML = filtered.map((item, index) => {
                     const targetUrl = item.file || item.name;
-                    const iconUrl = item.customIcon || `https://www.google.com/s2/favicons?domain=${new URL(targetUrl).hostname}&sz=128`;
+                    const iconUrl = item.customIcon || getFaviconUrl(targetUrl);
                     const menuId = `actionMenuList_${index}`;
                     const isNearBottom = index >= totalItems - 2;
                     const menuPositionClass = isNearBottom ? 'absolute right-0 bottom-full mb-1' : 'absolute right-0 top-full mt-1';
@@ -1060,7 +1164,7 @@
             if (item) {
                 item.title = document.getElementById('editShortcutTitle').value.trim();
                 item.name = item.title;
-                item.file = document.getElementById('editFileName').value.trim();
+                item.file = normalizeUrl(document.getElementById('editFileName').value);
                 item.category = document.getElementById('editShortcutCategory').value.trim() || 'Geral';
                 item.isFavorite = document.getElementById('editShortcutFavorite').checked;
                 saveToStorage();
@@ -1088,7 +1192,7 @@
         function handleFormSubmit(e) {
             e.preventDefault();
             const title = document.getElementById('shortcutTitle').value.trim();
-            const file = document.getElementById('fileName').value.trim();
+            const file = normalizeUrl(document.getElementById('fileName').value);
             const category = document.getElementById('shortcutCategory').value.trim() || 'Geral';
             const isFav = document.getElementById('shortcutFavorite').checked;
 
@@ -1111,35 +1215,75 @@
                 categories: categoryCustomizations,
                 viewModes: categoryViewModes
             };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", "links_backup.json");
-            dlAnchorElem.click();
+            // Blob + link anexado à página: funciona no Android e no iPhone (o link "data:" sem anexar não funcionava no Safari)
+            const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `links_backup_${stamp}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
         function triggerImportBackup() { document.getElementById('importFileInput').click(); }
         
         function handleImportBackup(e) {
-            const file = e.target.files[0];
+            const input = e.target;
+            const file = input.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(evt) {
                 try {
                     const imported = JSON.parse(evt.target.result);
-                    let incoming = Array.isArray(imported) ? imported : (imported.shortcuts || []);
-                    incoming.forEach(newItem => {
+                    const incoming = Array.isArray(imported) ? imported : imported.shortcuts;
+                    if (!Array.isArray(incoming)) throw new Error('Formato inválido');
+
+                    const usedIds = new Set(htmlFiles.map(f => f.id));
+                    const exists = (url, cat) => htmlFiles.some(f =>
+                        String(f.file || '').trim().toLowerCase() === url.toLowerCase() &&
+                        (f.category || 'Geral').trim() === cat);
+
+                    let added = 0, skipped = 0;
+                    incoming.forEach(raw => {
+                        const url = normalizeUrl(raw && raw.file);
+                        const title = String((raw && (raw.title || raw.name)) || '').trim();
+                        const category = String((raw && raw.category) || 'Geral').trim() || 'Geral';
+                        // Ignora itens sem link/título e links que já existem na mesma categoria
+                        if (!url || !title || exists(url, category)) { skipped++; return; }
+
+                        // Mantém o id do backup só se ele ainda não estiver em uso (evita ids repetidos)
+                        let id = raw.id && !usedIds.has(raw.id) ? raw.id : generateUniqueId();
+                        usedIds.add(id);
+
                         htmlFiles.push({
-                            id: generateUniqueId(),
-                            ...newItem,
-                            visitCount: newItem.visitCount || 0,
-                            isFavorite: newItem.isFavorite || false
+                            ...raw,
+                            id, title, name: title, file: url, category,
+                            customIcon: raw.customIcon || '',
+                            visitCount: raw.visitCount || 0,
+                            isFavorite: !!raw.isFavorite
                         });
+                        added++;
                     });
+
+                    // Restaura também os ícones de categoria e o modo de visualização, se existirem no backup
+                    if (!Array.isArray(imported)) {
+                        if (imported.categories && typeof imported.categories === 'object') Object.assign(categoryCustomizations, imported.categories);
+                        if (imported.viewModes && typeof imported.viewModes === 'object') Object.assign(categoryViewModes, imported.viewModes);
+                    }
+
                     saveToStorage(true);
                     render();
-                    alert('Backup importado e sincronizado com sucesso!');
-                } catch(err) { alert('Erro ao ler arquivo.'); }
+                    alert(`${added} link(s) importado(s)` + (skipped ? `, ${skipped} ignorado(s) (já existiam ou eram inválidos).` : '.') + '\nClique em Atualizar para sincronizar com a planilha.');
+                } catch (err) {
+                    alert('Erro ao ler o arquivo. Use um backup .json exportado pelo aplicativo.');
+                } finally {
+                    input.value = ''; // permite importar o mesmo arquivo de novo
+                }
             };
             reader.readAsText(file);
         }
@@ -1147,6 +1291,7 @@
         function confirmClearAllShortcuts() {
             if(confirm('Tem certeza que deseja apagar todos os atalhos?')) {
                 htmlFiles = [];
+                currentCategory = 'all';
                 saveToStorage();
                 render();
             }
@@ -1161,10 +1306,20 @@
 
         // Define o usuário atual: aponta APPS_SCRIPT_URL para a URL do e-mail e atualiza o rodapé.
         // Retorna false se o e-mail não estiver cadastrado.
+        // Retorna true (ok), false (e-mail não cadastrado) ou 'expired' (licença vencida).
+        const LICENSE_EXPIRED_MESSAGE = 'Cópia não registrada, entrar em contato com o desenvolvedor pelo telefone: 82987340685 para regularização da licença';
+
         function applyUser(email) {
             if (typeof azlinksBuscarUsuario !== 'function') return false;
             const user = azlinksBuscarUsuario(email);
             if (!user) return false;
+
+            if (user.vencida) {
+                // Licença vencida: não entra e não sincroniza
+                APPS_SCRIPT_URL = '';
+                APPS_SCRIPT_PLANILHA = '';
+                return 'expired';
+            }
 
             const previousEmail = localStorage.getItem('local_user_email');
             if (previousEmail && previousEmail !== user.email) {
@@ -1187,12 +1342,17 @@
             return true;
         }
 
-        function openEmailModal(canCancel) {
+        function openEmailModal(canCancel, message) {
             const input = document.getElementById('loginEmail');
             const error = document.getElementById('loginEmailError');
             const cancelBtn = document.getElementById('emailCancelBtn');
             input.value = localStorage.getItem('local_user_email') || '';
-            error.classList.add('hidden');
+            if (message) {
+                error.textContent = message;
+                error.classList.remove('hidden');
+            } else {
+                error.classList.add('hidden');
+            }
             cancelBtn.classList.toggle('hidden', !canCancel);
             document.getElementById('emailModal').classList.remove('hidden');
             input.focus();
@@ -1202,12 +1362,31 @@
             document.getElementById('emailModal').classList.add('hidden');
         }
 
+        // Licença vencida: mostra a mensagem em tela cheia, impedindo o uso do aplicativo
+        function showLicenseBlock() {
+            closeAllDropdowns();
+            document.getElementById('licenseBlockMessage').textContent = LICENSE_EXPIRED_MESSAGE;
+            document.getElementById('licenseBlock').classList.remove('hidden');
+        }
+
+        // Do bloqueio, só dá para tentar outro e-mail (sem botão de cancelar)
+        function useAnotherEmail() {
+            document.getElementById('licenseBlock').classList.add('hidden');
+            openEmailModal(false);
+        }
+
         async function handleEmailSubmit(e) {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
             const error = document.getElementById('loginEmailError');
 
-            if (!applyUser(email)) {
+            const result = applyUser(email);
+            if (result === 'expired') {
+                closeEmailModal();
+                showLicenseBlock();
+                return;
+            }
+            if (result !== true) {
                 error.textContent = 'E-mail não cadastrado. Entre em contato com o desenvolvedor.';
                 error.classList.remove('hidden');
                 return;
@@ -1224,8 +1403,11 @@
         window.onload = async function() {
             render();
             const savedEmail = localStorage.getItem('local_user_email');
-            if (savedEmail && applyUser(savedEmail)) {
+            const result = savedEmail ? applyUser(savedEmail) : false;
+            if (result === true) {
                 await syncAll();
+            } else if (result === 'expired') {
+                showLicenseBlock();
             } else {
                 openEmailModal(false);
             }
