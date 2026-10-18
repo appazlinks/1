@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Cadastros - AZLinks</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 2rem 1rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+
+        h2 {
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            color: #0f172a;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        input {
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-group {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        button {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: #64748b;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #475569;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: #f1f5f9;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .badge-active { background: #d1fae5; color: #065f46; }
+        .badge-expired { background: #fee2e2; color: #991b1b; }
+
+        pre {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Formulário de Cadastro -->
+    <div class="card">
+        <h2>Cadastrar / Editar Usuário</h2>
+        <form id="formUsuario">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="email">E-mail *</label>
+                    <input type="email" id="email" placeholder="usuario@exemplo.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="nome">Nome Completo *</label>
+                    <input type="text" id="nome" placeholder="Nome do Titular" required>
+                </div>
+                <div class="form-group full-width">
+                    <label for="planilha">Link ou ID da Planilha do Google *</label>
+                    <input type="text" id="planilha" placeholder="https://docs.google.com/spreadsheets/d/... ou ID puro" required>
+                </div>
+                <div class="form-group">
+                    <label for="validade">Data de Validade (DD/MM/AAAA)</label>
+                    <input type="text" id="validade" placeholder="31/12/2026 (ou deixe vazio)">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn-primary">Salvar Usuário</button>
+                <button type="button" class="btn-secondary" onclick="limparFormulario()">Limpar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabela de Usuários Cadastrados -->
+    <div class="card">
+        <h2>Usuários Cadastrados na Memória</h2>
+        <table id="tabelaUsuarios">
+            <thead>
+                <tr>
+                    <th>E-mail</th>
+                    <th>Nome</th>
+                    <th>ID Planilha</th>
+                    <th>Validade</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Preenchido via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Teste da Função azlinksBuscarUsuario -->
+    <div class="card">
+        <h2>Testar Busca de Usuário (azlinksBuscarUsuario)</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="buscaEmail">E-mail para teste</label>
+                <input type="email" id="buscaEmail" placeholder="Digite um e-mail para testar">
+            </div>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn-primary" onclick="testarBusca()">Buscar</button>
+        </div>
+        <div style="margin-top: 1rem;">
+            <pre id="resultadoBusca">Nenhum teste realizado ainda.</pre>
+        </div>
+    </div>
+
+    <!-- Código Gerado para usuarios.js -->
+    <div class="card">
+        <h2>Código Gerado para `usuarios.js`</h2>
+        <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Copie o bloco abaixo e substitua no seu arquivo <code>usuarios.js</code>:</p>
+        <pre id="codigoGerado"></pre>
+    </div>
+</div>
+
+<!-- Importa o arquivo original usuarios.js -->
+<script src="usuarios.js"></script>
+
+<script>
+    // Carrega a tabela e o código gerado ao abrir a página
+    document.addEventListener('DOMContentLoaded', () => {
+        atualizarTabela();
+        atualizarCodigoGerado();
+    });
+
+    const form = document.getElementById('formUsuario');
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const nome = document.getElementById('nome').value.trim();
+        const planilhaInput = document.getElementById('planilha').value.trim();
+        const validade = document.getElementById('validade').value.trim();
+
+        // Extrai o ID da planilha caso a função auxiliar esteja presente
+        const idPlanilha = typeof azlinksExtrairId === 'function' 
+            ? azlinksExtrairId(planilhaInput) 
+            : planilhaInput;
+
+        // Atualiza a lista global USUARIOS
+        USUARIOS[email] = [nome, idPlanilha, validade];
+
+        atualizarTabela();
+        atualizarCodigoGerado();
+        limparFormulario();
+    });
+
+    function limparFormulario() {
+        form.reset();
+    }
+
+    function removerUsuario(email) {
+        if (confirm(`Deseja remover o usuário ${email}?`)) {
+            delete USUARIOS[email];
+            atualizarTabela();
+            atualizarCodigoGerado();
+        }
+    }
+
+    function editarUsuario(email) {
+        const dados = USUARIOS[email];
+        if (!dados) return;
+
+        document.getElementById('email').value = email;
+        document.getElementById('nome').value = dados[0] || '';
+        document.getElementById('planilha').value = dados[1] || '';
+        document.getElementById('validade').value = dados[2] || '';
+    }
+
+    function atualizarTabela() {
+        const tbody = document.querySelector('#tabelaUsuarios tbody');
+        tbody.innerHTML = '';
+
+        const emails = Object.keys(USUARIOS);
+
+        if (emails.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum usuário cadastrado.</td></tr>';
+            return;
+        }
+
+        emails.forEach(email => {
+            const [nome, idPlanilha, validade] = USUARIOS[email];
+            const vencida = typeof azlinksLicencaVencida === 'function' ? azlinksLicencaVencida(validade) : false;
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${email}</td>
+                <td>${nome}</td>
+                <td><code>${idPlanilha}</code></td>
+                <td>${validade || '<em>Sem vencimento</em>'}</td>
+                <td>
+                    <span class="badge ${vencida ? 'badge-expired' : 'badge-active'}">
+                        ${vencida ? 'Vencida/Inválida' : 'Ativa'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn-secondary" onclick="editarUsuario('${email}')" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Editar</button>
+                    <button class="btn-danger" onclick="removerUsuario('${email}')">Excluir</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function testarBusca() {
+        const email = document.getElementById('buscaEmail').value.trim();
+        const res = typeof azlinksBuscarUsuario === 'function' ? azlinksBuscarUsuario(email) : null;
+        document.getElementById('resultadoBusca').textContent = JSON.stringify(res, null, 2);
+    }
+
+    function atualizarCodigoGerado() {
+        let textoUsuarios = 'const USUARIOS = {\n';
+        for (const email in USUARIOS) {
+            const [nome, id, val] = USUARIOS[email];
+            textoUsuarios += `    '${email}': ['${nome}', '${id}', '${val}'],\n`;
+        }
+        textoUsuarios += '};';
+
+        document.getElementById('codigoGerado').textContent = textoUsuarios;
+    }
+</script>
+
+</body>
+</html>
