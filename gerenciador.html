@@ -114,6 +114,26 @@
             border-color: var(--primary);
         }
 
+        /* Estilo do Campo de Busca com Lupa */
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding-left: 2.5rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.8rem;
+            color: #94a3b8;
+            pointer-events: none;
+            font-size: 1rem;
+        }
+
         .btn-group {
             margin-top: 1rem;
             display: flex;
@@ -303,11 +323,14 @@
         <button type="button" class="btn-novo" onclick="abrirModalNovo()">NOVO</button>
     </div>
 
-    <!-- Campo de Busca por Nome (Apenas o input) -->
+    <!-- Campo de Busca com Lupa e Placeholder "Pesquisar nome" -->
     <div class="card">
         <div class="form-grid">
             <div class="form-group full-width">
-                <input type="search" id="buscaNome" placeholder="Digite o nome do usuário para filtrar..." oninput="filtrarTabelaPorNome()">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="search" id="buscaNome" placeholder="Pesquisar nome" oninput="filtrarTabelaPorNome()">
+                </div>
             </div>
         </div>
     </div>
