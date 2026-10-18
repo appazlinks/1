@@ -3,12 +3,13 @@
 // ----------------------------------------------------------------------------
 // COMO CADASTRAR: adicione uma linha na lista USUARIOS, neste formato:
 //
-//     'email@exemplo.com': 'ID_DA_PLANILHA',
+//     'email@exemplo.com': ['Nome da Pessoa', 'ID_DA_PLANILHA'],
 //
-// O ID da planilha é o trecho entre /d/ e /edit no endereço dela:
+// - O nome aparece no rodapé do app, em "Licenciado para:".
+// - O ID da planilha é o trecho entre /d/ e /edit no endereço dela:
 //     https://docs.google.com/spreadsheets/d/  1AbC...XyZ  /edit
 //                                              ^^^^^^^^^^^
-// (Se preferir, pode colar o link inteiro da planilha que o ID é extraído sozinho.)
+//   (Se preferir, pode colar o link inteiro da planilha que o ID é extraído sozinho.)
 //
 // Este arquivo deve ficar na MESMA pasta do index.html.
 // ============================================================================
@@ -17,19 +18,11 @@
 // mesmo Apps Script; o que muda de um e-mail para outro é a planilha.
 const AZLINKS_URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyNRHauds83by09v_Dq5wYROW87ycWqqf1mn48VeRi7MXCHyh0g4v6VtnEULq8_jpA/exec';
 
-// Lista de e-mails e planilhas (uma linha por e-mail, sempre terminando com vírgula).
+// Lista de usuários: 'e-mail': ['Nome', 'ID da planilha'],  (uma linha por pessoa, com vírgula no final)
 const USUARIOS = {
-    'sbstor@gmail.com'           :  ['Sebastião Torquato',   '1w85zj8OpavB_Jzb1SnnmExm5PlvIZVvmNoalPlPSHeQ'],
-    'outra-pessoa@exemplo.com'   :  ['Sebastião Torquato','ID_DA_PLANILHA_2'],
-    'mais-uma-pessoa@exemplo.com':  ['Sebastião Torquato','ID_DA_PLANILHA_3'],
-};
-
-// ----------------------------------------------------------------------------
-// Opcional: nome que aparece em "Licenciado para:" no rodapé.
-// Se o e-mail não estiver aqui, o rodapé mostra o próprio e-mail.
-// ----------------------------------------------------------------------------
-const NOMES = {
-    'seu-email@exemplo.com': 'Sebastião Torquato',
+    'sbstor@gmail.com':            ['Sebastião Torquato',   '1w85zj8OpavB_Jzb1SnnmExm5PlvIZVvmNoalPlPSHeQ'],
+    'outra-pessoa@exemplo.com':    ['Nome da Outra Pessoa', 'ID_DA_PLANILHA_2'],
+    'mais-uma-pessoa@exemplo.com': ['Mais Uma Pessoa',      'ID_DA_PLANILHA_3'],
 };
 
 // ============================================================================
@@ -51,15 +44,12 @@ function azlinksBuscarUsuario(email) {
 
     for (const cadastrado in USUARIOS) {
         if (cadastrado.trim().toLowerCase() === chave) {
-            let nome = chave;
-            for (const n in NOMES) {
-                if (n.trim().toLowerCase() === chave) nome = NOMES[n];
-            }
+            const dados = USUARIOS[cadastrado] || [];
             return {
                 email: chave,
-                nome: nome,
+                nome: String(dados[0] || '').trim() || chave,
                 url: AZLINKS_URL_APPS_SCRIPT,
-                planilha: azlinksExtrairId(USUARIOS[cadastrado])
+                planilha: azlinksExtrairId(dados[1])
             };
         }
     }
