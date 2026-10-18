@@ -33,8 +33,35 @@
         .container {
             max-width: 900px;
             margin: 0 auto;
-            display: grid;
-            gap: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Cabeçalho superior com botão Novo alinhado à direita */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+        }
+
+        .btn-novo {
+            background-color: #ffffff;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 0.5rem 1.25rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-novo:hover {
+            background-color: var(--danger);
+            color: #ffffff;
         }
 
         .card {
@@ -209,41 +236,74 @@
         .dropdown.show .dropdown-content {
             display: block;
         }
+
+        /* Estilos do Modal (Formulário Oculto por padrão) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .modal-header h2 {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #64748b;
+            cursor: pointer;
+            padding: 0 0.5rem;
+        }
+
+        .close-btn:hover {
+            color: var(--danger);
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Formulário de Cadastro / Edição -->
-    <div class="card">
-        <h2>Cadastrar / Editar Usuário</h2>
-        <form id="formUsuario">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="email">E-mail *</label>
-                    <input type="email" id="email" placeholder="usuario@exemplo.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="nome">Nome Completo *</label>
-                    <input type="text" id="nome" placeholder="Nome do Titular" required>
-                </div>
-                <div class="form-group full-width">
-                    <label for="planilha">Link ou ID da Planilha do Google *</label>
-                    <input type="text" id="planilha" placeholder="https://docs.google.com/spreadsheets/d/... ou ID puro" required>
-                </div>
-                <div class="form-group">
-                    <label for="validade">Data de Validade (DD/MM/AAAA)</label>
-                    <input type="text" id="validade" placeholder="31/12/2026 (ou deixe vazio)">
-                </div>
-            </div>
-            <div class="btn-group">
-                <button type="submit" class="btn-primary">Salvar Usuário</button>
-                <button type="button" class="btn-secondary" onclick="limparFormulario()">Limpar</button>
-            </div>
-        </form>
+    <!-- Botão NOVO na parte superior direita -->
+    <div class="top-bar">
+        <button type="button" class="btn-novo" onclick="abrirModalNovo()">NOVO</button>
     </div>
 
-    <!-- Campo de Busca por Nome (Com botão X nativo e sem botão Limpar Busca) -->
+    <!-- Campo de Busca por Nome -->
     <div class="card">
         <h2>Buscar por Nome do Usuário</h2>
         <div class="form-grid">
@@ -275,6 +335,40 @@
     </div>
 </div>
 
+<!-- Modal para Cadastrar / Editar Usuário -->
+<div class="modal-overlay" id="modalForm">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2 id="modalTitulo">Cadastrar Usuário</h2>
+            <button class="close-btn" onclick="fecharModal()">&times;</button>
+        </div>
+        <form id="formUsuario">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="email">E-mail *</label>
+                    <input type="email" id="email" placeholder="usuario@exemplo.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="nome">Nome Completo *</label>
+                    <input type="text" id="nome" placeholder="Nome do Titular" required>
+                </div>
+                <div class="form-group full-width">
+                    <label for="planilha">Link ou ID da Planilha do Google *</label>
+                    <input type="text" id="planilha" placeholder="https://docs.google.com/spreadsheets/d/... ou ID puro" required>
+                </div>
+                <div class="form-group">
+                    <label for="validade">Data de Validade (DD/MM/AAAA)</label>
+                    <input type="text" id="validade" placeholder="31/12/2026 (ou deixe vazio)">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn-primary">Salvar Usuário</button>
+                <button type="button" class="btn-secondary" onclick="fecharModal()">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Importa o arquivo usuarios.js -->
 <script src="usuarios.js"></script>
 
@@ -282,17 +376,33 @@
     document.addEventListener('DOMContentLoaded', () => {
         atualizarTabela();
 
-        // Fecha menus dropdown ao clicar fora
+        // Fecha menus dropdown ou modal ao clicar fora
         window.addEventListener('click', (e) => {
             if (!e.target.matches('.dropbtn')) {
                 document.querySelectorAll('.dropdown').forEach(drop => {
                     drop.classList.remove('show');
                 });
             }
+            if (e.target.classList.contains('modal-overlay')) {
+                fecharModal();
+            }
         });
     });
 
     const form = document.getElementById('formUsuario');
+    const modal = document.getElementById('modalForm');
+
+    function abrirModalNovo() {
+        form.reset();
+        document.getElementById('email').removeAttribute('readonly');
+        document.getElementById('modalTitulo').textContent = 'Cadastrar Usuário';
+        modal.classList.add('active');
+    }
+
+    function fecharModal() {
+        modal.classList.remove('active');
+        form.reset();
+    }
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -309,12 +419,8 @@
         USUARIOS[email] = [nome, idPlanilha, validade];
 
         atualizarTabela();
-        limparFormulario();
+        fecharModal();
     });
-
-    function limparFormulario() {
-        form.reset();
-    }
 
     function removerUsuario(email) {
         if (confirm(`Deseja remover o usuário ${email}?`)) {
@@ -328,17 +434,19 @@
         if (!dados) return;
 
         document.getElementById('email').value = email;
+        document.getElementById('email').setAttribute('readonly', 'true');
         document.getElementById('nome').value = dados[0] || '';
         document.getElementById('planilha').value = dados[1] || '';
         document.getElementById('validade').value = dados[2] || '';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('modalTitulo').textContent = 'Editar Usuário';
+        
+        modal.classList.add('active');
     }
 
     function toggleMenu(event, element) {
         event.stopPropagation();
         const dropdown = element.closest('.dropdown');
         
-        // Fecha outros menus abertos
         document.querySelectorAll('.dropdown').forEach(drop => {
             if (drop !== dropdown) drop.classList.remove('show');
         });
