@@ -19,9 +19,9 @@ const AZLINKS_URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyNRHau
 
 // Lista de e-mails e planilhas (uma linha por e-mail, sempre terminando com vírgula).
 const USUARIOS = {
-    'sbstor@gmail.com'           : '1w85zj8OpavB_Jzb1SnnmExm5PlvIZVvmNoalPlPSHeQ',
-    'outra-pessoa@exemplo.com'   : 'ID_DA_PLANILHA_2',
-    'mais-uma-pessoa@exemplo.com': 'ID_DA_PLANILHA_3',
+    'sbstor@gmail.com'           :  ['Sebastião Torquato',   '1w85zj8OpavB_Jzb1SnnmExm5PlvIZVvmNoalPlPSHeQ'],
+    'outra-pessoa@exemplo.com'   :  ['Sebastião Torquato','ID_DA_PLANILHA_2'],
+    'mais-uma-pessoa@exemplo.com':  ['Sebastião Torquato','ID_DA_PLANILHA_3'],
 };
 
 // ----------------------------------------------------------------------------
