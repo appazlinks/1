@@ -227,7 +227,7 @@
 
     <!-- Rodapé Fixo -->
     <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2.5 flex items-center justify-between text-xs text-gray-500 z-40 shadow-md md:relative">
-        <div onclick="openPasswordModal()" class="flex items-center gap-2 truncate cursor-pointer hover:text-blue-600 transition-colors w-full justify-center md:justify-start">
+        <div onclick="openEmailModal(true)" title="Trocar de e-mail" class="flex items-center gap-2 truncate cursor-pointer hover:text-blue-600 transition-colors w-full justify-center md:justify-start">
             <i class="fa-solid fa-shield-halved text-blue-600 shrink-0"></i>
             <span class="truncate">Licenciado para: <strong id="footerLicenseName" class="text-gray-700">Sebastião Torquato</strong></span>
         </div>
@@ -236,6 +236,26 @@
     <input type="file" id="localFileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
     <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="handleImportBackup(event)">
     <input type="file" id="shortcutIconFileInput" accept="image/*" class="hidden" onchange="handleShortcutIconFileSelect(event)">
+
+    <!-- Modal de acesso por e-mail -->
+    <div id="emailModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
+            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2"><i class="fa-solid fa-envelope text-blue-600"></i> Acessar com e-mail</h3>
+            </div>
+            <form onsubmit="handleEmailSubmit(event)" class="p-5 flex flex-col gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">E-mail cadastrado *</label>
+                    <input type="email" id="loginEmail" required autocomplete="email" autocapitalize="none" placeholder="seuemail@exemplo.com" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <p id="loginEmailError" class="hidden text-xs text-red-600 mt-1.5"></p>
+                </div>
+                <div class="flex items-center justify-end gap-2 mt-2 pt-3 border-t">
+                    <button type="button" id="emailCancelBtn" onclick="closeEmailModal()" class="hidden px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Entrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Modais -->
     <div id="shortcutModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -366,10 +386,15 @@
         </div>
     </div>
 
+    <!-- Cadastro de e-mails e URLs do Apps Script (mesma pasta do index.html) -->
+    <script src="usuarios.js"></script>
     <script>
-        // URL do Apps Script: informe aqui uma única vez.
-        // Se ficar vazia ou com o texto de exemplo, a sincronização é desativada.
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyNRHauds83by09v_Dq5wYROW87ycWqqf1mn48VeRi7MXCHyh0g4v6VtnEULq8_jpA/exec';
+        // URL do Apps Script do usuário logado. É definida automaticamente a partir do e-mail
+        // cadastrado em usuarios.js. Se ficar vazia ou com o texto de exemplo, a sincronização é desativada.
+        let APPS_SCRIPT_URL = '';
+        // Planilha (ID ou link) do usuário logado, enviada ao Apps Script junto com os lançamentos.
+        // Só é preenchida se o e-mail tiver o campo "planilha" em usuarios.js.
+        let APPS_SCRIPT_PLANILHA = '';
         const APPS_SCRIPT_URL_PLACEHOLDER = 'SUA_URL_DO_APPS_SCRIPT_AQUI';
 
         function isSyncConfigured() {
@@ -478,7 +503,7 @@
                     method: "POST",
                     mode: "no-cors",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ shortcuts: htmlFiles })
+                    body: JSON.stringify({ shortcuts: htmlFiles, planilha: APPS_SCRIPT_PLANILHA })
                 });
                 localStorage.setItem('local_sync_dirty', '0');
             } catch (err) {
@@ -498,7 +523,10 @@
             if (iconMob) iconMob.classList.add('fa-spin');
 
             try {
-                const res = await fetchWithTimeout(APPS_SCRIPT_URL);
+                const getUrl = APPS_SCRIPT_PLANILHA
+                    ? APPS_SCRIPT_URL + (APPS_SCRIPT_URL.includes('?') ? '&' : '?') + 'planilha=' + encodeURIComponent(APPS_SCRIPT_PLANILHA)
+                    : APPS_SCRIPT_URL;
+                const res = await fetchWithTimeout(getUrl);
                 const data = await res.json();
                 if (data.status === "success") localStorage.setItem('local_sync_pulled', '1');
                 if (data.status === "success" && Array.isArray(data.shortcuts) && data.shortcuts.length > 0) {
@@ -1129,11 +1157,78 @@
             renderGrid();
         }
 
-        // Sincroniza apenas em dois momentos: ao entrar no aplicativo e ao clicar no botão Atualizar.
-        // Alterações feitas durante o uso (adicionar, editar, remover) não disparam sincronização.
-        window.onload = async function() {
+        // ---------- Acesso por e-mail (cadastro em usuarios.js) ----------
+
+        // Define o usuário atual: aponta APPS_SCRIPT_URL para a URL do e-mail e atualiza o rodapé.
+        // Retorna false se o e-mail não estiver cadastrado.
+        function applyUser(email) {
+            if (typeof azlinksBuscarUsuario !== 'function') return false;
+            const user = azlinksBuscarUsuario(email);
+            if (!user) return false;
+
+            const previousEmail = localStorage.getItem('local_user_email');
+            if (previousEmail && previousEmail !== user.email) {
+                // Outro e-mail neste aparelho: descarta os dados locais do e-mail anterior
+                // e baixa os dados da planilha do novo e-mail.
+                htmlFiles = JSON.parse(JSON.stringify(defaultHtmlFiles));
+                categoryCustomizations = {};
+                currentCategory = 'all';
+                localStorage.removeItem('local_sync_dirty');
+                localStorage.removeItem('local_sync_pulled');
+                saveToStorage(false);
+            }
+
+            APPS_SCRIPT_URL = user.url;
+            APPS_SCRIPT_PLANILHA = user.planilha;
+            localStorage.setItem('local_user_email', user.email);
+
+            const footerName = document.getElementById('footerLicenseName');
+            if (footerName) footerName.textContent = user.nome;
+            return true;
+        }
+
+        function openEmailModal(canCancel) {
+            const input = document.getElementById('loginEmail');
+            const error = document.getElementById('loginEmailError');
+            const cancelBtn = document.getElementById('emailCancelBtn');
+            input.value = localStorage.getItem('local_user_email') || '';
+            error.classList.add('hidden');
+            cancelBtn.classList.toggle('hidden', !canCancel);
+            document.getElementById('emailModal').classList.remove('hidden');
+            input.focus();
+        }
+
+        function closeEmailModal() {
+            document.getElementById('emailModal').classList.add('hidden');
+        }
+
+        async function handleEmailSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const error = document.getElementById('loginEmailError');
+
+            if (!applyUser(email)) {
+                error.textContent = 'E-mail não cadastrado. Entre em contato com o desenvolvedor.';
+                error.classList.remove('hidden');
+                return;
+            }
+
+            closeEmailModal();
             render();
             await syncAll();
+        }
+
+        // Ao entrar no aplicativo: se o e-mail salvo neste aparelho ainda estiver cadastrado,
+        // entra direto e sincroniza; senão, pede o e-mail.
+        // Depois disso, a sincronização só acontece ao clicar no botão Atualizar.
+        window.onload = async function() {
+            render();
+            const savedEmail = localStorage.getItem('local_user_email');
+            if (savedEmail && applyUser(savedEmail)) {
+                await syncAll();
+            } else {
+                openEmailModal(false);
+            }
         };
     </script>
 </body>
