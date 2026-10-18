@@ -120,13 +120,6 @@
             background-color: #475569;
         }
 
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-            padding: 0.3rem 0.6rem;
-            font-size: 0.8rem;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -154,13 +147,67 @@
         .badge-active { background: #d1fae5; color: #065f46; }
         .badge-expired { background: #fee2e2; color: #991b1b; }
 
-        pre {
-            background: #1e293b;
-            color: #f8fafc;
-            padding: 1rem;
+        /* Estilos do Menu de Três Pontinhos */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropbtn {
+            background-color: #f1f5f9;
+            color: #334155;
+            padding: 0.4rem 0.8rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+
+        .dropbtn:hover {
+            background-color: #e2e8f0;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #ffffff;
+            min-width: 120px;
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
             border-radius: 6px;
-            overflow-x: auto;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .dropdown-content button {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 0.5rem 0.75rem;
             font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--text);
+            border-radius: 0;
+        }
+
+        .dropdown-content button:hover {
+            background-color: #f1f5f9;
+        }
+
+        .dropdown-content button.text-danger {
+            color: var(--danger);
+        }
+
+        .dropdown-content button.text-danger:hover {
+            background-color: #fee2e2;
+        }
+
+        .dropdown.show .dropdown-content {
+            display: block;
         }
     </style>
 </head>
@@ -196,17 +243,14 @@
         </form>
     </div>
 
-    <!-- Campo de Busca de Usuário (Por Nome) -->
+    <!-- Campo de Busca por Nome (Com botão X nativo e sem botão Limpar Busca) -->
     <div class="card">
         <h2>Buscar por Nome do Usuário</h2>
         <div class="form-grid">
             <div class="form-group full-width">
                 <label for="buscaNome">Digite o nome do usuário para filtrar</label>
-                <input type="text" id="buscaNome" placeholder="Digite o nome..." oninput="filtrarTabelaPorNome()">
+                <input type="search" id="buscaNome" placeholder="Digite o nome..." oninput="filtrarTabelaPorNome()">
             </div>
-        </div>
-        <div class="btn-group">
-            <button type="button" class="btn-secondary" onclick="limparBusca()">Limpar Busca</button>
         </div>
     </div>
 
@@ -237,6 +281,15 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         atualizarTabela();
+
+        // Fecha menus dropdown ao clicar fora
+        window.addEventListener('click', (e) => {
+            if (!e.target.matches('.dropbtn')) {
+                document.querySelectorAll('.dropdown').forEach(drop => {
+                    drop.classList.remove('show');
+                });
+            }
+        });
     });
 
     const form = document.getElementById('formUsuario');
@@ -281,6 +334,18 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    function toggleMenu(event, element) {
+        event.stopPropagation();
+        const dropdown = element.closest('.dropdown');
+        
+        // Fecha outros menus abertos
+        document.querySelectorAll('.dropdown').forEach(drop => {
+            if (drop !== dropdown) drop.classList.remove('show');
+        });
+
+        dropdown.classList.toggle('show');
+    }
+
     function atualizarTabela(filtroNome = '') {
         const tbody = document.querySelector('#tabelaUsuarios tbody');
         tbody.innerHTML = '';
@@ -291,7 +356,7 @@
         if (termo) {
             emails = emails.filter(email => {
                 const nome = String(USUARIOS[email][0] || '').toLowerCase();
-                return nome.includes(termo); // Filtra especificamente pelo nome
+                return nome.includes(termo);
             });
         }
 
@@ -316,8 +381,13 @@
                     </span>
                 </td>
                 <td>
-                    <button class="btn-secondary" onclick="editarUsuario('${email}')" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Editar</button>
-                    <button class="btn-danger" onclick="removerUsuario('${email}')">Excluir</button>
+                    <div class="dropdown">
+                        <button type="button" class="dropbtn" onclick="toggleMenu(event, this)">⋮</button>
+                        <div class="dropdown-content">
+                            <button type="button" onclick="editarUsuario('${email}')">Editar</button>
+                            <button type="button" class="text-danger" onclick="removerUsuario('${email}')">Excluir</button>
+                        </div>
+                    </div>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -327,11 +397,6 @@
     function filtrarTabelaPorNome() {
         const termo = document.getElementById('buscaNome').value;
         atualizarTabela(termo);
-    }
-
-    function limparBusca() {
-        document.getElementById('buscaNome').value = '';
-        atualizarTabela();
     }
 </script>
 
