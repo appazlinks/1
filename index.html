@@ -43,14 +43,12 @@
             cursor: pointer;
         }
 
-        /* AJUSTE: Expande a altura máxima da lista de categorias no celular */
         .category-scroll {
             max-height: calc(100dvh - 70px);
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
 
-        /* Espaçamento extra na base para o rodapé fixo não cobrir os últimos atalhos */
         .safe-bottom-padding {
             padding-bottom: calc(env(safe-area-inset-bottom) + 6rem) !important;
         }
@@ -85,34 +83,31 @@
 
             <!-- Botões Desktop -->
             <div class="hidden md:flex items-center gap-2 shrink-0">
-                <div class="relative dropdown-container">
-                    <button type="button" id="btnBackupDesk" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium cursor-pointer">
-                        <i class="fa-solid fa-database text-blue-600 pointer-events-none"></i> 
-                        <span class="pointer-events-none">Links</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] pointer-events-none"></i>
+                <!-- Botões de Visualização Lado a Lado -->
+                <div class="flex items-center bg-gray-100 border border-gray-200 rounded p-0.5 gap-0.5">
+                    <button type="button" onclick="setViewMode('grid')" title="Visualização em Grade" id="btnGridDesk" class="p-1.5 text-xs rounded text-gray-700 hover:bg-white transition-all cursor-pointer">
+                        <i class="fa-solid fa-border-all"></i>
                     </button>
-                    <div id="backupDropdownDesk" class="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1">
-                        <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-download text-gray-400"></i> Exportar</button>
-                        <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-upload text-gray-400"></i> Importar</button>
-                        <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-trash text-red-500"></i> Remover Todos</button>
-                    </div>
-                </div>
-
-                <div class="relative dropdown-container">
-                    <button type="button" id="btnViewDesk" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium cursor-pointer">
-                        <i class="fa-solid fa-eye text-blue-600 pointer-events-none"></i> 
-                        <span class="pointer-events-none">Visualização</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] pointer-events-none"></i>
+                    <button type="button" onclick="setViewMode('list')" title="Visualização em Lista" id="btnListDesk" class="p-1.5 text-xs rounded text-gray-700 hover:bg-white transition-all cursor-pointer">
+                        <i class="fa-solid fa-list"></i>
                     </button>
-                    <div id="viewDropdownDesk" class="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1">
-                        <button onclick="setViewMode('grid'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-border-all text-gray-400"></i> Grade</button>
-                        <button onclick="setViewMode('list'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-list text-gray-400"></i> Lista</button>
-                    </div>
                 </div>
 
                 <button type="button" onclick="syncFromGoogleSheets()" title="Forçar sincronização" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center cursor-pointer">
                     <i id="syncIconDesk" class="fa-solid fa-rotate-right pointer-events-none"></i>
                 </button>
+
+                <!-- Menu Três Pontinhos -->
+                <div class="relative dropdown-container">
+                    <button type="button" id="btnMoreDesk" title="Mais opções" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-ellipsis-vertical pointer-events-none"></i>
+                    </button>
+                    <div id="moreDropdownDesk" class="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1 text-xs">
+                        <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-download text-gray-400"></i> Exportar</button>
+                        <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-upload text-gray-400"></i> Importar</button>
+                        <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-red-600 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-trash text-red-500"></i> Remover Todos</button>
+                    </div>
+                </div>
 
                 <button type="button" onclick="openModal()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-sm font-medium shadow-sm transition-all cursor-pointer">
                     <i class="fa-solid fa-plus pointer-events-none"></i> <span class="pointer-events-none">Novo</span>
@@ -138,30 +133,31 @@
             <div class="flex md:hidden items-center justify-between gap-1.5 w-full flex-wrap pb-1">
                 <button type="button" onclick="openModal()" class="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium shrink-0 cursor-pointer"><i class="fa-solid fa-plus pointer-events-none"></i> <span class="pointer-events-none">Novo</span></button>
                 
-                <div class="relative dropdown-container shrink-0">
-                    <button type="button" id="btnBackupMob" class="px-2 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 flex items-center gap-1 font-medium cursor-pointer">
-                        <i class="fa-solid fa-database text-blue-600 pointer-events-none"></i> <span class="pointer-events-none">Links</span> <i class="fa-solid fa-chevron-down text-[10px] pointer-events-none"></i>
+                <!-- Botões de Visualização Lado a Lado (Mobile) -->
+                <div class="flex items-center bg-gray-100 border border-gray-200 rounded p-0.5 gap-0.5 shrink-0">
+                    <button type="button" onclick="setViewMode('grid')" title="Grade" id="btnGridMob" class="p-1.5 text-xs rounded text-gray-700 hover:bg-white transition-all cursor-pointer">
+                        <i class="fa-solid fa-border-all"></i>
                     </button>
-                    <div id="backupDropdownMob" class="absolute left-0 mt-1 w-40 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1">
-                        <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-download"></i> Exportar</button>
-                        <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-upload"></i> Importar</button>
-                        <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-gray-100"><i class="fa-solid fa-trash"></i> Remover Todos</button>
-                    </div>
-                </div>
-
-                <div class="relative dropdown-container shrink-0">
-                    <button type="button" id="btnViewMob" class="px-2 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 flex items-center gap-1 font-medium cursor-pointer">
-                        <i class="fa-solid fa-eye text-blue-600 pointer-events-none"></i> <span class="pointer-events-none">Visualização</span> <i class="fa-solid fa-chevron-down text-[10px] pointer-events-none"></i>
+                    <button type="button" onclick="setViewMode('list')" title="Lista" id="btnListMob" class="p-1.5 text-xs rounded text-gray-700 hover:bg-white transition-all cursor-pointer">
+                        <i class="fa-solid fa-list"></i>
                     </button>
-                    <div id="viewDropdownMob" class="absolute left-0 mt-1 w-36 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1">
-                        <button onclick="setViewMode('grid'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-border-all"></i> Grade</button>
-                        <button onclick="setViewMode('list'); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-list"></i> Lista</button>
-                    </div>
                 </div>
 
                 <button type="button" onclick="syncFromGoogleSheets()" title="Forçar sincronização" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:text-blue-600 transition-all flex items-center justify-center shrink-0 cursor-pointer">
                     <i id="syncIconMob" class="fa-solid fa-rotate-right pointer-events-none"></i>
                 </button>
+
+                <!-- Menu Três Pontinhos (Mobile) -->
+                <div class="relative dropdown-container shrink-0">
+                    <button type="button" id="btnMoreMob" title="Mais opções" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:text-blue-600 transition-all flex items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-ellipsis-vertical pointer-events-none"></i>
+                    </button>
+                    <div id="moreDropdownMob" class="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1 text-xs">
+                        <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-download text-gray-400"></i> Exportar</button>
+                        <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-upload text-gray-400"></i> Importar</button>
+                        <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-red-600 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-trash text-red-500"></i> Remover Todos</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -193,7 +189,6 @@
     </header>
 
     <div class="flex-1 flex overflow-hidden relative">
-        <!-- AJUSTE: Expande a barra lateral até o final no celular -->
         <aside id="sidebar" onmouseenter="expandSidebar()" onmouseleave="collapseSidebar()" 
                class="fixed inset-y-0 left-0 -translate-x-full md:translate-x-0 md:relative bg-gray-50/95 backdrop-blur-md border-r border-gray-200 p-3 flex flex-col justify-between transition-all duration-300 w-64 md:w-16 z-40 md:z-30 shadow-lg md:shadow-none max-h-[100dvh]">
             <div class="flex flex-col gap-1 w-full category-scroll pb-16 md:pb-0">
@@ -724,6 +719,36 @@
             return categoryViewModes[cat] || 'grid';
         }
 
+        function updateViewButtonsStyle() {
+            const mode = getViewMode(currentCategory);
+            const gridBtnDesk = document.getElementById('btnGridDesk');
+            const listBtnDesk = document.getElementById('btnListDesk');
+            const gridBtnMob = document.getElementById('btnGridMob');
+            const listBtnMob = document.getElementById('btnListMob');
+
+            [gridBtnDesk, gridBtnMob].forEach(btn => {
+                if (!btn) return;
+                if (mode === 'grid') {
+                    btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600', 'font-semibold');
+                    btn.classList.remove('text-gray-700');
+                } else {
+                    btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600', 'font-semibold');
+                    btn.classList.add('text-gray-700');
+                }
+            });
+
+            [listBtnDesk, listBtnMob].forEach(btn => {
+                if (!btn) return;
+                if (mode === 'list') {
+                    btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600', 'font-semibold');
+                    btn.classList.remove('text-gray-700');
+                } else {
+                    btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600', 'font-semibold');
+                    btn.classList.add('text-gray-700');
+                }
+            });
+        }
+
         function toggleDropdown(id) {
             const el = document.getElementById(id);
             if (!el) return;
@@ -735,7 +760,7 @@
         }
 
         function closeAllDropdowns() {
-            ['backupDropdownDesk', 'viewDropdownDesk', 'backupDropdownMob', 'viewDropdownMob'].forEach(id => {
+            ['moreDropdownDesk', 'moreDropdownMob'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
             });
@@ -768,10 +793,8 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             const dropdownPairs = [
-                { btnId: 'btnBackupDesk', menuId: 'backupDropdownDesk' },
-                { btnId: 'btnViewDesk',   menuId: 'viewDropdownDesk' },
-                { btnId: 'btnBackupMob',  menuId: 'backupDropdownMob' },
-                { btnId: 'btnViewMob',    menuId: 'viewDropdownMob' }
+                { btnId: 'btnMoreDesk', menuId: 'moreDropdownDesk' },
+                { btnId: 'btnMoreMob',  menuId: 'moreDropdownMob' }
             ];
 
             dropdownPairs.forEach(pair => {
@@ -980,6 +1003,7 @@
             const viewMode = getViewMode(currentCategory);
             if (!grid) return;
             updateCategoryHeader();
+            updateViewButtonsStyle();
 
             let filtered = htmlFiles;
             if (searchQuery.length > 0) {
