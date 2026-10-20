@@ -26,7 +26,7 @@ const AZLINKS_URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyNRHau
 const USUARIOS = {
     'sbstor@gmail.com':            ['Sebastião Torquato',   '1w85zj8OpavB_Jzb1SnnmExm5PlvIZVvmNoalPlPSHeQ', ''],
     'admin@azlinks.com':           ['Azlinks',               '1f9tzttg-ndB0HHnyw2oqZj1VZSiiHpV834LgPzJRqws', ''],
-    'mais-uma-pessoa@exemplo.com': ['Mais Uma Pessoa',      'ID_DA_PLANILHA_3', ''],
+    'demonstracao@azlinks.com':    ['Demonstracao',           '1ZgJtW_x_0KO6H7-BlMeiA8vWbr_fNGoFm2s4IM3d0Ng', ''],
 };
 
 // ============================================================================
