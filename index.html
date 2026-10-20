@@ -38,7 +38,6 @@
         ::-webkit-scrollbar-thumb { background: #cdcdcd; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a6a6a6; }
 
-        /* CORREÇÃO: remove atraso de toque e garante que o iOS gere 'click' nos botões */
         button, [onclick] {
             touch-action: manipulation;
             cursor: pointer;
@@ -112,7 +111,7 @@
                 </div>
 
                 <!-- Botão Atualizar / Sincronizar -->
-                <button type="button" onclick="syncAll()" title="Sincronizar com a planilha Google" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center cursor-pointer">
+                <button type="button" onclick="syncFromGoogleSheets()" title="Forçar sincronização com a planilha Google" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center cursor-pointer">
                     <i id="syncIconDesk" class="fa-solid fa-rotate-right pointer-events-none"></i>
                 </button>
 
@@ -136,7 +135,7 @@
                 </div>
             </div>
 
-            <!-- Botões Mobile (CORREÇÃO: flex-wrap no lugar de overflow-x-auto, que cortava os menus) -->
+            <!-- Botões Mobile -->
             <div class="flex md:hidden items-center justify-between gap-1.5 w-full flex-wrap pb-1">
                 <button type="button" onclick="openModal()" class="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium shrink-0 cursor-pointer"><i class="fa-solid fa-plus pointer-events-none"></i> <span class="pointer-events-none">Novo</span></button>
                 
@@ -161,7 +160,7 @@
                     </div>
                 </div>
 
-                <button type="button" onclick="syncAll()" title="Sincronizar com a planilha Google" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:text-blue-600 transition-all flex items-center justify-center shrink-0 cursor-pointer">
+                <button type="button" onclick="syncFromGoogleSheets()" title="Forçar sincronização com a planilha Google" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:text-blue-600 transition-all flex items-center justify-center shrink-0 cursor-pointer">
                     <i id="syncIconMob" class="fa-solid fa-rotate-right pointer-events-none"></i>
                 </button>
             </div>
@@ -238,7 +237,7 @@
     <input type="file" id="shortcutIconFileInput" accept="image/*" class="hidden" onchange="handleShortcutIconFileSelect(event)">
     <input type="file" id="categoryIconFileInput" accept="image/*" class="hidden" onchange="handleCategoryIconFileSelect(event)">
 
-    <!-- Tela de licença vencida: cobre todo o aplicativo e não pode ser fechada -->
+    <!-- Tela de licença vencida -->
     <div id="licenseBlock" class="fixed inset-0 bg-white z-[70] hidden flex items-center justify-center p-6">
         <div class="w-full max-w-md border-2 border-red-500 rounded-lg p-6 flex flex-col items-center text-center gap-4">
             <i class="fa-solid fa-lock text-red-500 text-4xl"></i>
@@ -402,15 +401,9 @@
         </div>
     </div>
 
-    <!-- Cadastro de e-mails e URLs do Apps Script (mesma pasta do index.html) -->
-    <!-- O "?t=" evita que o navegador use uma versão antiga em cache do usuarios.js -->
     <script>document.write('<script src="usuarios.js?t=' + Date.now() + '"><\/script>');</script>
     <script>
-        // URL do Apps Script do usuário logado. É definida automaticamente a partir do e-mail
-        // cadastrado em usuarios.js. Se ficar vazia ou com o texto de exemplo, a sincronização é desativada.
         let APPS_SCRIPT_URL = '';
-        // Planilha (ID ou link) do usuário logado, enviada ao Apps Script junto com os lançamentos.
-        // Só é preenchida se o e-mail tiver o campo "planilha" em usuarios.js.
         let APPS_SCRIPT_PLANILHA = '';
         const APPS_SCRIPT_URL_PLACEHOLDER = 'SUA_URL_DO_APPS_SCRIPT_AQUI';
 
@@ -418,14 +411,12 @@
             return !!APPS_SCRIPT_URL && APPS_SCRIPT_URL !== APPS_SCRIPT_URL_PLACEHOLDER;
         }
 
-        // Garante que o link tenha protocolo (ex.: "google.com" vira "https://google.com")
         function normalizeUrl(value) {
             const v = String(value || '').trim();
             if (!v) return '';
             return /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v) ? v : 'https://' + v;
         }
 
-        // Ícone do site; não quebra a tela se o link for inválido
         function getFaviconUrl(targetUrl) {
             try {
                 return `https://www.google.com/s2/favicons?domain=${new URL(targetUrl).hostname}&sz=128`;
@@ -453,6 +444,8 @@
         let sidebarOpen = false;
         let itemToDeleteId = null;
         let editingShortcutIconId = null;
+        let isSyncing = false;
+        let syncInterval = null;
 
         const availableCategoryIcons = [
             { icon: 'fa-solid fa-house', color: 'text-amber-500' },
@@ -501,8 +494,6 @@
             return 'fa-solid fa-folder text-blue-500';
         }
 
-        // Controle do aviso "Sincronizando...": conta quantas sincronizações estão em andamento
-        // e só esconde o aviso quando todas terminarem (com sucesso, erro ou tempo esgotado).
         let pendingSyncCount = 0;
 
         function beginSync() {
@@ -519,8 +510,6 @@
             }
         }
 
-        // fetch com limite de tempo: se a requisição travar (comum no iPhone/Safari),
-        // ela é cancelada e o aviso não fica preso na tela.
         function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -529,7 +518,8 @@
         }
 
         async function syncToGoogleSheets() {
-            if (!isSyncConfigured()) return;
+            if (!isSyncConfigured() || isSyncing) return;
+            isSyncing = true;
             beginSync();
             try {
                 await fetchWithTimeout(APPS_SCRIPT_URL, {
@@ -538,19 +528,20 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ shortcuts: htmlFiles, planilha: APPS_SCRIPT_PLANILHA })
                 });
-                localStorage.setItem('local_sync_dirty', '0');
             } catch (err) {
                 console.error("Erro ao sincronizar envio:", err);
             } finally {
+                isSyncing = false;
                 endSync();
             }
         }
 
         async function syncFromGoogleSheets() {
-            if (!isSyncConfigured()) return;
+            if (!isSyncConfigured() || isSyncing) return;
             const iconDesk = document.getElementById('syncIconDesk');
             const iconMob = document.getElementById('syncIconMob');
 
+            isSyncing = true;
             beginSync();
             if (iconDesk) iconDesk.classList.add('fa-spin');
             if (iconMob) iconMob.classList.add('fa-spin');
@@ -561,45 +552,44 @@
                     : APPS_SCRIPT_URL;
                 const res = await fetchWithTimeout(getUrl);
                 const data = await res.json();
-                if (data.status === "success") localStorage.setItem('local_sync_pulled', '1');
-                if (data.status === "success" && Array.isArray(data.shortcuts) && data.shortcuts.length > 0) {
-                    htmlFiles = data.shortcuts;
-                    localStorage.setItem('local_sync_dirty', '0');
-                    localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
-                    render();
+                if (data.status === "success" && Array.isArray(data.shortcuts)) {
+                    const newShortcutsStr = JSON.stringify(data.shortcuts);
+                    const currentShortcutsStr = JSON.stringify(htmlFiles);
+                    
+                    if (newShortcutsStr !== currentShortcutsStr) {
+                        htmlFiles = data.shortcuts;
+                        localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
+                        render();
+                    }
                 }
             } catch (err) {
                 console.error("Erro ao puxar dados do Sheets:", err);
             } finally {
+                isSyncing = false;
                 endSync();
                 if (iconDesk) iconDesk.classList.remove('fa-spin');
                 if (iconMob) iconMob.classList.remove('fa-spin');
             }
         }
 
-        // Chamada pelo botão Atualizar (única forma de sincronizar):
-        // - se há alterações locais pendentes E este aparelho já baixou os dados da planilha antes,
-        //   envia os dados locais para a planilha;
-        // - caso contrário, baixa os dados da planilha. Isso protege a planilha de ser sobrescrita
-        //   por um aparelho novo ou desatualizado.
-        async function syncAll() {
-            if (!isSyncConfigured()) return;
-            const dirty = localStorage.getItem('local_sync_dirty') === '1';
-            const pulled = localStorage.getItem('local_sync_pulled') === '1';
-            if (dirty && pulled) {
-                await syncToGoogleSheets();
-            } else {
-                await syncFromGoogleSheets();
-            }
+        // Sincronização automática contínua em segundo plano (a cada 10 segundos)
+        function startAutoSync() {
+            if (syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(() => {
+                if (!document.hidden) {
+                    syncFromGoogleSheets();
+                }
+            }, 10000);
         }
 
-        function saveToStorage(forceSync = true) {
+        // Atualiza a tela local e dispara o envio imediato para o Google Sheets
+        function saveToStorage(syncNow = true) {
             localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
             localStorage.setItem('local_category_customizations', JSON.stringify(categoryCustomizations));
             localStorage.setItem('local_category_view_modes', JSON.stringify(categoryViewModes));
-            // Não sincroniza mais automaticamente: apenas marca que há alterações locais
-            // pendentes. O envio só acontece quando o usuário clicar no botão Atualizar.
-            if (forceSync) localStorage.setItem('local_sync_dirty', '1');
+            if (syncNow) {
+                syncToGoogleSheets();
+            }
         }
 
         function openShortcut(url, itemId) {
@@ -607,7 +597,7 @@
                 const item = htmlFiles.find(f => f.id === itemId);
                 if (item) {
                     item.visitCount = (item.visitCount || 0) + 1;
-                    saveToStorage();
+                    saveToStorage(true);
                 }
             }
             window.open(url, '_blank');
@@ -618,12 +608,11 @@
             const item = htmlFiles.find(f => f.id === itemId);
             if (item) {
                 item.isFavorite = !item.isFavorite;
-                saveToStorage();
+                saveToStorage(true);
                 render();
             }
         }
 
-        // Configuração da Pesquisa
         const searchInputs = document.querySelectorAll('.search-input');
         const clearBtns = document.querySelectorAll('.clear-search-btn');
         
@@ -678,14 +667,12 @@
 
         function filterCategory(cat) {
             currentCategory = cat;
-            // Redesenha o menu lateral (para destacar a categoria selecionada) e a lista de atalhos
             renderCategories();
             applySidebarState();
             renderGrid();
             if (window.innerWidth < 768) collapseSidebar();
         }
 
-        // Atualiza o título (e o ícone) do cabeçalho conforme a categoria selecionada
         function updateCategoryHeader() {
             const titleEl = document.getElementById('currentCategoryTitle');
             if (!titleEl) return;
@@ -763,9 +750,6 @@
             document.querySelectorAll('.action-menu-dropdown').forEach(m => m.classList.add('hidden'));
         }
 
-        // Fecha menus ao tocar/clicar fora.
-        // CORREÇÃO: no iOS, "click" nem sempre chega ao window em áreas sem elemento clicável,
-        // então também escutamos "touchstart" (passivo) apenas para fechar os menus.
         function handleOutsideInteraction(e) {
             if (!e.target.closest('.action-menu-container') && !e.target.closest('button[onclick*="toggleActionMenu"]')) {
                 closeAllActionMenus();
@@ -777,9 +761,6 @@
         window.addEventListener('click', handleOutsideInteraction);
         window.addEventListener('touchstart', handleOutsideInteraction, { passive: true });
 
-        // CORREÇÃO PRINCIPAL: apenas "click" nos botões dos dropdowns.
-        // Antes havia "touchend" + "click": em celular o toque disparava os dois eventos,
-        // o menu abria no touchend e fechava logo em seguida no click.
         window.addEventListener('DOMContentLoaded', () => {
             const dropdownPairs = [
                 { btnId: 'btnBackupDesk', menuId: 'backupDropdownDesk' },
@@ -842,7 +823,6 @@
                     actionMenuHtml = `<span class="sidebar-text md:hidden text-xs bg-gray-200/70 px-2 py-0.5 rounded-full">${count}</span>`;
                 }
 
-                // Categoria com imagem própria (escolhida na galeria/pasta) usa a imagem no lugar do ícone
                 const customImage = (!isSystem && categoryCustomizations[catVal] && categoryCustomizations[catVal].image) || '';
                 const iconHtml = customImage
                     ? `<img src="${customImage}" alt="" class="w-4 h-4 object-contain rounded shrink-0 pointer-events-none">`
@@ -893,7 +873,6 @@
                 }
             });
 
-            // Se a categoria tem imagem própria e o campo do ícone não foi alterado, mantém a imagem (mesmo renomeando)
             const oldCustom = categoryCustomizations[oldName];
             const iconChanged = newIcon !== getCategoryIcon(oldName);
             if (oldCustom && oldCustom.image && !iconChanged) {
@@ -904,7 +883,7 @@
             if (newName !== oldName) delete categoryCustomizations[oldName];
 
             if (currentCategory === oldName) currentCategory = newName;
-            saveToStorage();
+            saveToStorage(true);
             closeEditCategoryModal();
             render();
         }
@@ -915,12 +894,10 @@
             document.getElementById('editCategoryIconModal').classList.remove('hidden');
         }
 
-        // Abre a galeria do celular ou o seletor de arquivos do computador
         function triggerCategoryIconFile() {
             document.getElementById('categoryIconFileInput').click();
         }
 
-        // Lê a imagem escolhida, reduz para 96x96 (economiza espaço) e aplica na categoria
         function handleCategoryIconFileSelect(e) {
             const input = e.target;
             const file = input.files[0];
@@ -942,7 +919,7 @@
                     canvas.getContext('2d').drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
 
                     categoryCustomizations[catName] = { image: canvas.toDataURL('image/png') };
-                    saveToStorage(false);
+                    saveToStorage(true);
                     closeEditCategoryIconModal();
                     render();
                     input.value = '';
@@ -964,7 +941,6 @@
             const catName = document.getElementById('editCategoryIconName').value;
             const newIcon = document.getElementById('newCategoryIconClass').value.trim();
 
-            // Se já há uma imagem escolhida e a classe do ícone não foi alterada, mantém a imagem
             const current = categoryCustomizations[catName];
             if (catName && current && current.image && newIcon === getCategoryIcon(catName)) {
                 closeEditCategoryIconModal();
@@ -972,9 +948,8 @@
             }
 
             if (catName && newIcon) {
-                // Digitar uma classe de ícone substitui a imagem anterior
                 categoryCustomizations[catName] = { icon: newIcon };
-                saveToStorage();
+                saveToStorage(true);
                 render();
             }
             closeEditCategoryIconModal();
@@ -988,7 +963,7 @@
                     }
                 });
                 if (currentCategory === catName) currentCategory = 'all';
-                saveToStorage();
+                saveToStorage(true);
                 render();
             }
         }
@@ -1113,7 +1088,7 @@
                 const item = htmlFiles.find(f => f.id === editingShortcutIconId);
                 if (item) {
                     item.customIcon = base64String;
-                    saveToStorage();
+                    saveToStorage(true);
                     render();
                 }
                 editingShortcutIconId = null;
@@ -1123,13 +1098,9 @@
         }
 
         function openModal() {
-            // Sempre abre com os campos limpos
             const form = document.querySelector('#shortcutModal form');
             if (form) form.reset();
 
-            // Dentro de uma categoria real (não "Todos", "Favoritos" ou "Mais Visitados"):
-            // o campo Categoria fica oculto e o link é gravado direto nessa categoria.
-            // Em "Todos" (ou Favoritos/Mais Visitados) o campo aparece para o usuário escolher.
             const systemCategories = ['all', 'favorites', 'most_visited'];
             const categoryWrapper = document.getElementById('shortcutCategoryWrapper');
             if (!systemCategories.includes(currentCategory)) {
@@ -1167,7 +1138,7 @@
                 item.file = normalizeUrl(document.getElementById('editFileName').value);
                 item.category = document.getElementById('editShortcutCategory').value.trim() || 'Geral';
                 item.isFavorite = document.getElementById('editShortcutFavorite').checked;
-                saveToStorage();
+                saveToStorage(true);
             }
             closeEditShortcutModal();
             render();
@@ -1180,7 +1151,7 @@
             document.getElementById('deleteMessage').textContent = `Deseja remover o atalho "${item.title || item.name}"?`;
             document.getElementById('confirmDeleteBtn').onclick = () => {
                 htmlFiles = htmlFiles.filter(f => f.id !== itemToDeleteId);
-                saveToStorage();
+                saveToStorage(true);
                 closeDeleteModal();
                 render();
             };
@@ -1203,7 +1174,7 @@
                 title, name: title, file, category, customIcon: '',
                 visitCount: 0, isFavorite: isFav
             });
-            saveToStorage();
+            saveToStorage(true);
             e.target.reset();
             closeModal();
             render();
@@ -1215,7 +1186,6 @@
                 categories: categoryCustomizations,
                 viewModes: categoryViewModes
             };
-            // Blob + link anexado à página: funciona no Android e no iPhone (o link "data:" sem anexar não funcionava no Safari)
             const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const now = new Date();
@@ -1253,10 +1223,8 @@
                         const url = normalizeUrl(raw && raw.file);
                         const title = String((raw && (raw.title || raw.name)) || '').trim();
                         const category = String((raw && raw.category) || 'Geral').trim() || 'Geral';
-                        // Ignora itens sem link/título e links que já existem na mesma categoria
                         if (!url || !title || exists(url, category)) { skipped++; return; }
 
-                        // Mantém o id do backup só se ele ainda não estiver em uso (evita ids repetidos)
                         let id = raw.id && !usedIds.has(raw.id) ? raw.id : generateUniqueId();
                         usedIds.add(id);
 
@@ -1270,7 +1238,6 @@
                         added++;
                     });
 
-                    // Restaura também os ícones de categoria e o modo de visualização, se existirem no backup
                     if (!Array.isArray(imported)) {
                         if (imported.categories && typeof imported.categories === 'object') Object.assign(categoryCustomizations, imported.categories);
                         if (imported.viewModes && typeof imported.viewModes === 'object') Object.assign(categoryViewModes, imported.viewModes);
@@ -1278,11 +1245,11 @@
 
                     saveToStorage(true);
                     render();
-                    alert(`${added} link(s) importado(s)` + (skipped ? `, ${skipped} ignorado(s) (já existiam ou eram inválidos).` : '.') + '\nClique em Atualizar para sincronizar com a planilha.');
+                    alert(`${added} link(s) importado(s)` + (skipped ? `, ${skipped} ignorado(s) (já existiam ou eram inválidos).` : '.'));
                 } catch (err) {
                     alert('Erro ao ler o arquivo. Use um backup .json exportado pelo aplicativo.');
                 } finally {
-                    input.value = ''; // permite importar o mesmo arquivo de novo
+                    input.value = '';
                 }
             };
             reader.readAsText(file);
@@ -1292,7 +1259,7 @@
             if(confirm('Tem certeza que deseja apagar todos os atalhos?')) {
                 htmlFiles = [];
                 currentCategory = 'all';
-                saveToStorage();
+                saveToStorage(true);
                 render();
             }
         }
@@ -1302,11 +1269,6 @@
             renderGrid();
         }
 
-        // ---------- Acesso por e-mail (cadastro em usuarios.js) ----------
-
-        // Define o usuário atual: aponta APPS_SCRIPT_URL para a URL do e-mail e atualiza o rodapé.
-        // Retorna false se o e-mail não estiver cadastrado.
-        // Retorna true (ok), false (e-mail não cadastrado) ou 'expired' (licença vencida).
         const LICENSE_EXPIRED_MESSAGE = 'Cópia não registrada, entrar em contato com o desenvolvedor pelo telefone: 82987340685 para regularização da licença';
 
         function applyUser(email) {
@@ -1315,7 +1277,6 @@
             if (!user) return false;
 
             if (user.vencida) {
-                // Licença vencida: não entra e não sincroniza
                 APPS_SCRIPT_URL = '';
                 APPS_SCRIPT_PLANILHA = '';
                 return 'expired';
@@ -1323,13 +1284,9 @@
 
             const previousEmail = localStorage.getItem('local_user_email');
             if (previousEmail && previousEmail !== user.email) {
-                // Outro e-mail neste aparelho: descarta os dados locais do e-mail anterior
-                // e baixa os dados da planilha do novo e-mail.
                 htmlFiles = JSON.parse(JSON.stringify(defaultHtmlFiles));
                 categoryCustomizations = {};
                 currentCategory = 'all';
-                localStorage.removeItem('local_sync_dirty');
-                localStorage.removeItem('local_sync_pulled');
                 saveToStorage(false);
             }
 
@@ -1362,14 +1319,12 @@
             document.getElementById('emailModal').classList.add('hidden');
         }
 
-        // Licença vencida: mostra a mensagem em tela cheia, impedindo o uso do aplicativo
         function showLicenseBlock() {
             closeAllDropdowns();
             document.getElementById('licenseBlockMessage').textContent = LICENSE_EXPIRED_MESSAGE;
             document.getElementById('licenseBlock').classList.remove('hidden');
         }
 
-        // Do bloqueio, só dá para tentar outro e-mail (sem botão de cancelar)
         function useAnotherEmail() {
             document.getElementById('licenseBlock').classList.add('hidden');
             openEmailModal(false);
@@ -1394,18 +1349,24 @@
 
             closeEmailModal();
             render();
-            await syncAll();
+            await syncFromGoogleSheets();
+            startAutoSync();
         }
 
-        // Ao entrar no aplicativo: se o e-mail salvo neste aparelho ainda estiver cadastrado,
-        // entra direto e sincroniza; senão, pede o e-mail.
-        // Depois disso, a sincronização só acontece ao clicar no botão Atualizar.
+        // Verifica a planilha ao reabrir/focar na aba ou no aplicativo
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && isSyncConfigured()) {
+                syncFromGoogleSheets();
+            }
+        });
+
         window.onload = async function() {
             render();
             const savedEmail = localStorage.getItem('local_user_email');
             const result = savedEmail ? applyUser(savedEmail) : false;
             if (result === true) {
-                await syncAll();
+                await syncFromGoogleSheets();
+                startAutoSync();
             } else if (result === 'expired') {
                 showLicenseBlock();
             } else {
