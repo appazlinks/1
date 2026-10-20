@@ -205,6 +205,7 @@
         <div id="sidebarOverlay" onclick="collapseSidebar()" class="fixed inset-0 bg-black/40 z-30 hidden"></div>
 
         <main class="flex-1 flex flex-col p-3 md:p-4 overflow-y-auto safe-bottom-padding gap-4">
+            <!-- CORREÇÃO: min-h-[120px] e pb-4 garante espaço interno suficiente evitando corte de ícones nas bordas -->
             <div id="shortcutsGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 gap-3"></div>
             <div id="shortcutsList" class="hidden flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm overflow-visible"></div>
             
@@ -993,7 +994,7 @@
                 const visitsB = b.visitCount || 0;
                 
                 if (visitsB !== visitsA) {
-                    return visitsB - visitsA; // Maior número de visitas primeiro
+                    return visitsB - visitsA;
                 }
                 
                 const titleA = (a.title || a.name || '').toLowerCase();
@@ -1016,6 +1017,7 @@
             if (viewMode === 'grid') {
                 list.classList.add('hidden');
                 grid.classList.remove('hidden');
+                // CORREÇÃO DOS ÍCONES CORTADOS: Ajustado padding interno (py-4) e altura mínima (min-h-[110px]) para acomodar perfeitamente o card no celular
                 grid.innerHTML = filtered.map((item, index) => {
                     const targetUrl = item.file || item.name;
                     const iconUrl = item.customIcon || getFaviconUrl(targetUrl);
@@ -1023,17 +1025,17 @@
                     const isFav = !!item.isFavorite;
 
                     return `
-                        <div class="group relative flex flex-col items-center justify-center p-3 rounded-lg cursor-pointer text-center bg-white border border-gray-200/80 hover:border-blue-300 hover:shadow-sm"
+                        <div class="group relative flex flex-col items-center justify-between p-3 py-4 min-h-[110px] rounded-lg cursor-pointer text-center bg-white border border-gray-200/80 hover:border-blue-300 hover:shadow-sm"
                              onclick="openShortcut('${targetUrl}', '${item.id}')">
                             
                             <button type="button" onclick="toggleFavorite(event, '${item.id}')" class="absolute top-1 left-1 p-1 text-gray-300 hover:text-amber-400 z-10 cursor-pointer">
                                 <i class="fa-solid fa-star text-xs ${isFav ? 'text-amber-400' : ''} pointer-events-none"></i>
                             </button>
 
-                            <div class="w-10 h-10 mb-2 flex items-center justify-center pointer-events-none">
+                            <div class="w-10 h-10 my-auto flex items-center justify-center pointer-events-none">
                                 <img src="${iconUrl}" class="w-8 h-8 object-contain" onerror="this.src='https://via.placeholder.com/32'">
                             </div>
-                            <span class="text-xs text-gray-700 line-clamp-2 w-full font-medium pointer-events-none">${item.title || item.name}</span>
+                            <span class="text-xs text-gray-700 line-clamp-2 w-full font-medium pointer-events-none mt-1">${item.title || item.name}</span>
                             
                             <div class="absolute top-1 right-1 action-menu-container z-10">
                                 <button type="button" onclick="toggleActionMenu(event, '${menuId}')" title="Ações" class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors cursor-pointer">
