@@ -83,7 +83,6 @@
 
             <!-- Botões Desktop -->
             <div class="hidden md:flex items-center gap-2 shrink-0">
-                <!-- Dropdown Links -->
                 <div class="relative dropdown-container">
                     <button type="button" id="btnBackupDesk" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium cursor-pointer">
                         <i class="fa-solid fa-database text-blue-600 pointer-events-none"></i> 
@@ -97,7 +96,6 @@
                     </div>
                 </div>
 
-                <!-- Dropdown Visualização -->
                 <div class="relative dropdown-container">
                     <button type="button" id="btnViewDesk" class="px-2.5 py-1.5 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center gap-1.5 font-medium cursor-pointer">
                         <i class="fa-solid fa-eye text-blue-600 pointer-events-none"></i> 
@@ -110,8 +108,7 @@
                     </div>
                 </div>
 
-                <!-- Botão Atualizar / Sincronizar -->
-                <button type="button" onclick="syncFromGoogleSheets()" title="Forçar sincronização com a planilha Google" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center cursor-pointer">
+                <button type="button" onclick="syncFromGoogleSheets()" title="Forçar sincronização" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center cursor-pointer">
                     <i id="syncIconDesk" class="fa-solid fa-rotate-right pointer-events-none"></i>
                 </button>
 
@@ -121,7 +118,7 @@
             </div>
         </div>
 
-        <!-- Barra de Pesquisa Desktop -->
+        <!-- Pesquisa Desktop -->
         <div class="flex items-center justify-between w-full gap-2">
             <div class="hidden md:flex items-center gap-2 flex-1">
                 <button type="button" onclick="toggleMobileSidebar()" title="Menu" class="p-2 text-gray-600 hover:text-blue-600 focus:outline-none rounded-md hover:bg-gray-100 transition-colors shrink-0 cursor-pointer">
@@ -160,13 +157,13 @@
                     </div>
                 </div>
 
-                <button type="button" onclick="syncFromGoogleSheets()" title="Forçar sincronização com a planilha Google" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:text-blue-600 transition-all flex items-center justify-center shrink-0 cursor-pointer">
+                <button type="button" onclick="syncFromGoogleSheets()" title="Forçar sincronização" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:text-blue-600 transition-all flex items-center justify-center shrink-0 cursor-pointer">
                     <i id="syncIconMob" class="fa-solid fa-rotate-right pointer-events-none"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Barra de Pesquisa Mobile e Menu Hambúrguer -->
+        <!-- Pesquisa Mobile -->
         <div class="flex md:hidden items-center gap-2 w-full">
             <button type="button" onclick="toggleMobileSidebar()" title="Menu" class="p-2 text-gray-600 hover:text-blue-600 focus:outline-none rounded-md hover:bg-gray-100 transition-colors shrink-0 cursor-pointer">
                 <i class="fa-solid fa-bars text-lg pointer-events-none"></i>
@@ -179,7 +176,7 @@
             </div>
         </div>
 
-        <!-- Cabeçalho da Categoria -->
+        <!-- Cabeçalho Categoria -->
         <div class="flex items-center justify-between bg-white px-4 py-2 rounded-lg border border-gray-200/80 shadow-sm w-full">
             <h2 id="currentCategoryTitle" class="font-semibold text-gray-800 text-xs md:text-base flex items-center gap-2">
                 <i class="fa-solid fa-folder-open text-blue-600"></i> Todos os Atalhos
@@ -194,7 +191,6 @@
     </header>
 
     <div class="flex-1 flex overflow-hidden relative">
-        <!-- Sidebar / Menu Lateral -->
         <aside id="sidebar" onmouseenter="expandSidebar()" onmouseleave="collapseSidebar()" 
                class="fixed inset-y-0 left-0 -translate-x-full md:translate-x-0 md:relative bg-gray-50/95 backdrop-blur-md border-r border-gray-200 p-3 flex flex-col justify-between transition-all duration-300 w-64 md:w-16 z-40 md:z-30 shadow-lg md:shadow-none">
             <div class="flex flex-col gap-1 w-full category-scroll pb-10 md:pb-0">
@@ -212,11 +208,6 @@
             <div id="shortcutsGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 gap-3"></div>
             <div id="shortcutsList" class="hidden flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm overflow-visible"></div>
             
-            <div id="unregisteredNotice" class="hidden w-full border-2 border-red-500 rounded-lg p-6 flex flex-col items-center justify-center bg-white/50 my-4 text-center gap-2">
-                <span class="text-red-500 font-semibold text-xl tracking-wide">Cópia não Registrada!</span>
-                <span class="text-gray-700 font-medium text-sm">Entrar em contato com o desenvolvedor pelo whatsapp: 8298734-0685</span>
-            </div>
-
             <div id="emptyState" class="hidden flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-400">
                 <i class="fa-regular fa-folder-open text-5xl mb-3 text-gray-300"></i>
                 <p class="text-base font-medium">Nenhum atalho encontrado</p>
@@ -224,7 +215,7 @@
         </main>
     </div>
 
-    <!-- Rodapé Fixo -->
+    <!-- Rodapé -->
     <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2.5 flex items-center justify-between text-xs text-gray-500 z-40 shadow-md md:relative">
         <div onclick="openEmailModal(true)" title="Trocar de e-mail" class="flex items-center gap-2 truncate cursor-pointer hover:text-blue-600 transition-colors w-full justify-center md:justify-start">
             <i class="fa-solid fa-shield-halved text-blue-600 shrink-0"></i>
@@ -232,7 +223,6 @@
         </div>
     </footer>
 
-    <input type="file" id="localFileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
     <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="handleImportBackup(event)">
     <input type="file" id="shortcutIconFileInput" accept="image/*" class="hidden" onchange="handleShortcutIconFileSelect(event)">
     <input type="file" id="categoryIconFileInput" accept="image/*" class="hidden" onchange="handleCategoryIconFileSelect(event)">
@@ -266,7 +256,7 @@
         </div>
     </div>
 
-    <!-- Modais -->
+    <!-- Modal Adicionar Atalho -->
     <div id="shortcutModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
             <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
@@ -429,15 +419,8 @@
             return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
 
-        const defaultHtmlFiles = [
-            { id: generateUniqueId(), title: 'g1', name: 'g1', file: 'https://g1.globo.com/', category: 'Notícias', customIcon: '', visitCount: 0, isFavorite: false },
-            { id: generateUniqueId(), title: 'Gemini', name: 'Gemini', file: 'https://gemini.google.com/app', category: 'IA', customIcon: '', visitCount: 0, isFavorite: true },
-            { id: generateUniqueId(), title: 'Youtube', name: 'Youtube', file: 'https://www.youtube.com', category: 'Canais', customIcon: '', visitCount: 0, isFavorite: true }
-        ];
-
-        let htmlFiles = JSON.parse(localStorage.getItem('local_html_shortcuts')) || defaultHtmlFiles;
+        let htmlFiles = JSON.parse(localStorage.getItem('local_html_shortcuts')) || [];
         let categoryCustomizations = JSON.parse(localStorage.getItem('local_category_customizations')) || {};
-        let licensedTo = localStorage.getItem('local_app_license') || 'Sebastião Torquato';
         let currentCategory = 'all';
         let searchQuery = '';
         let categoryViewModes = JSON.parse(localStorage.getItem('local_category_view_modes')) || {};
@@ -526,7 +509,11 @@
                     method: "POST",
                     mode: "no-cors",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ shortcuts: htmlFiles, planilha: APPS_SCRIPT_PLANILHA })
+                    body: JSON.stringify({ 
+                        shortcuts: htmlFiles, 
+                        categories: categoryCustomizations, 
+                        planilha: APPS_SCRIPT_PLANILHA 
+                    })
                 });
             } catch (err) {
                 console.error("Erro ao sincronizar envio:", err);
@@ -552,13 +539,29 @@
                     : APPS_SCRIPT_URL;
                 const res = await fetchWithTimeout(getUrl);
                 const data = await res.json();
-                if (data.status === "success" && Array.isArray(data.shortcuts)) {
-                    const newShortcutsStr = JSON.stringify(data.shortcuts);
-                    const currentShortcutsStr = JSON.stringify(htmlFiles);
+                
+                if (data.status === "success") {
+                    let changed = false;
                     
-                    if (newShortcutsStr !== currentShortcutsStr) {
-                        htmlFiles = data.shortcuts;
-                        localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
+                    if (Array.isArray(data.shortcuts)) {
+                        const newShortcutsStr = JSON.stringify(data.shortcuts);
+                        if (newShortcutsStr !== JSON.stringify(htmlFiles)) {
+                            htmlFiles = data.shortcuts;
+                            localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
+                            changed = true;
+                        }
+                    }
+
+                    if (data.categories && typeof data.categories === 'object') {
+                        const newCatStr = JSON.stringify(data.categories);
+                        if (newCatStr !== JSON.stringify(categoryCustomizations)) {
+                            categoryCustomizations = data.categories;
+                            localStorage.setItem('local_category_customizations', JSON.stringify(categoryCustomizations));
+                            changed = true;
+                        }
+                    }
+
+                    if (changed) {
                         render();
                     }
                 }
@@ -572,7 +575,6 @@
             }
         }
 
-        // Sincronização automática contínua em segundo plano (a cada 10 segundos)
         function startAutoSync() {
             if (syncInterval) clearInterval(syncInterval);
             syncInterval = setInterval(() => {
@@ -582,7 +584,6 @@
             }, 10000);
         }
 
-        // Atualiza a tela local e dispara o envio imediato para o Google Sheets
         function saveToStorage(syncNow = true) {
             localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
             localStorage.setItem('local_category_customizations', JSON.stringify(categoryCustomizations));
@@ -1284,7 +1285,7 @@
 
             const previousEmail = localStorage.getItem('local_user_email');
             if (previousEmail && previousEmail !== user.email) {
-                htmlFiles = JSON.parse(JSON.stringify(defaultHtmlFiles));
+                htmlFiles = [];
                 categoryCustomizations = {};
                 currentCategory = 'all';
                 saveToStorage(false);
@@ -1353,7 +1354,6 @@
             startAutoSync();
         }
 
-        // Verifica a planilha ao reabrir/focar na aba ou no aplicativo
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && isSyncConfigured()) {
                 syncFromGoogleSheets();
