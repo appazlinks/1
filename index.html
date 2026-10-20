@@ -969,7 +969,7 @@
             }
         }
 
-        function renderGrid() {
+      function renderGrid() {
             const grid = document.getElementById('shortcutsGrid');
             const list = document.getElementById('shortcutsList');
             const empty = document.getElementById('emptyState');
@@ -985,6 +985,9 @@
                 else if (currentCategory === 'most_visited') filtered = htmlFiles.filter(s => (s.visitCount || 0) > 0);
                 else if (currentCategory !== 'all') filtered = htmlFiles.filter(s => (s.category || 'Geral').trim() === currentCategory);
             }
+
+            // ORDENAÇÃO: Garante que os atalhos com mais visitas venham sempre primeiro (do maior para o menor)
+            filtered.sort((a, b) => (b.visitCount || 0) - (a.visitCount || 0));
 
             document.getElementById('currentCategoryCount').textContent = `${filtered.length} itens`;
 
