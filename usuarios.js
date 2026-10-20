@@ -25,7 +25,7 @@ const AZLINKS_URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbyNRHau
 // Lista de usuários: 'e-mail': ['Nome', 'ID da planilha', 'Validade'],  (uma linha por pessoa, com vírgula no final)
 const USUARIOS = {
     'sbstor@gmail.com':            ['Sebastião Torquato',   '1w85zj8OpavB_Jzb1SnnmExm5PlvIZVvmNoalPlPSHeQ', ''],
-    'outra-pessoa@exemplo.com':    ['Nome da Outra Pessoa', 'ID_DA_PLANILHA_2', '30/06/2027'],
+    'admin@azlinks.com':           ['Azlinks',               'ID_DA_PLANILHA_2', '31/12/2026'],
     'mais-uma-pessoa@exemplo.com': ['Mais Uma Pessoa',      'ID_DA_PLANILHA_3', ''],
 };
 
