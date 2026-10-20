@@ -599,6 +599,7 @@
                 if (item) {
                     item.visitCount = (item.visitCount || 0) + 1;
                     saveToStorage(true);
+                    render();
                 }
             }
             window.open(url, '_blank');
@@ -969,7 +970,7 @@
             }
         }
 
-      function renderGrid() {
+        function renderGrid() {
             const grid = document.getElementById('shortcutsGrid');
             const list = document.getElementById('shortcutsList');
             const empty = document.getElementById('emptyState');
@@ -986,8 +987,19 @@
                 else if (currentCategory !== 'all') filtered = htmlFiles.filter(s => (s.category || 'Geral').trim() === currentCategory);
             }
 
-            // ORDENAÇÃO: Garante que os atalhos com mais visitas venham sempre primeiro (do maior para o menor)
-            filtered.sort((a, b) => (b.visitCount || 0) - (a.visitCount || 0));
+            // ORDENAÇÃO: 1º por Visitas (decrescente), 2º por Ordem Alfabética (A-Z)
+            filtered.sort((a, b) => {
+                const visitsA = a.visitCount || 0;
+                const visitsB = b.visitCount || 0;
+                
+                if (visitsB !== visitsA) {
+                    return visitsB - visitsA; // Maior número de visitas primeiro
+                }
+                
+                const titleA = (a.title || a.name || '').toLowerCase();
+                const titleB = (b.title || b.name || '').toLowerCase();
+                return titleA.localeCompare(titleB);
+            });
 
             document.getElementById('currentCategoryCount').textContent = `${filtered.length} itens`;
 
