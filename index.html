@@ -452,6 +452,30 @@
             return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
 
+        function shareShortcut(itemId) {
+            const item = htmlFiles.find(f => f.id === itemId);
+            if (!item) return;
+
+            const title = item.title || item.name || 'Atalho';
+            const url = item.file || item.name;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    text: title,
+                    url: url
+                }).catch((err) => {
+                    console.log('Compartilhamento cancelado ou não suportado:', err);
+                });
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Link copiado para a área de transferência!');
+                }).catch(() => {
+                    alert('Não foi possível compartilhar automaticamente. Link: ' + url);
+                });
+            }
+        }
+
         let htmlFiles = JSON.parse(localStorage.getItem('local_html_shortcuts')) || [];
         let categoryCustomizations = JSON.parse(localStorage.getItem('local_category_customizations')) || {};
         let currentCategory = 'all';
@@ -1125,6 +1149,7 @@
                                     <i class="fa-solid fa-ellipsis-vertical text-xs pointer-events-none"></i>
                                 </button>
                                 <div id="${menuId}" class="action-menu-dropdown absolute top-full right-0 w-36 bg-white border rounded shadow-lg hidden z-50 py-1 text-left text-xs">
+                                    <button type="button" onclick="event.stopPropagation(); shareShortcut('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700 cursor-pointer"><i class="fa-solid fa-share-nodes text-emerald-600 pointer-events-none"></i> Compartilhar</button>
                                     <button type="button" onclick="event.stopPropagation(); openEditShortcutModal('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700 cursor-pointer"><i class="fa-solid fa-pen text-blue-500 pointer-events-none"></i> Editar</button>
                                     <button type="button" onclick="event.stopPropagation(); triggerShortcutIconChange('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700 cursor-pointer"><i class="fa-solid fa-image text-gray-400 pointer-events-none"></i> Alterar Ícone</button>
                                     <button type="button" onclick="event.stopPropagation(); deleteItem('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-red-600 cursor-pointer"><i class="fa-solid fa-trash pointer-events-none"></i> Remover</button>
@@ -1164,6 +1189,7 @@
                                     <i class="fa-solid fa-ellipsis-vertical text-xs pointer-events-none"></i>
                                 </button>
                                 <div id="${menuId}" class="action-menu-dropdown ${menuPositionClass} w-36 bg-white border rounded shadow-lg hidden z-50 py-1 text-left text-xs">
+                                    <button type="button" onclick="event.stopPropagation(); shareShortcut('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700 cursor-pointer"><i class="fa-solid fa-share-nodes text-emerald-600 pointer-events-none"></i> Compartilhar</button>
                                     <button type="button" onclick="event.stopPropagation(); openEditShortcutModal('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700 cursor-pointer"><i class="fa-solid fa-pen text-blue-500 pointer-events-none"></i> Editar</button>
                                     <button type="button" onclick="event.stopPropagation(); triggerShortcutIconChange('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700 cursor-pointer"><i class="fa-solid fa-image text-gray-400 pointer-events-none"></i> Alterar Ícone</button>
                                     <button type="button" onclick="event.stopPropagation(); deleteItem('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-red-600 cursor-pointer"><i class="fa-solid fa-trash pointer-events-none"></i> Remover</button>
