@@ -232,7 +232,7 @@
         </div>
     </div>
 
-    <!-- Modal de acesso por e-mail sem placeholders e sem texto AAAAAAAA -->
+    <!-- Modal de acesso por e-mail -->
     <div id="emailModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100">
             <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
@@ -277,10 +277,23 @@
                     <input type="text" id="shortcutCategory" list="categorySuggestions" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <datalist id="categorySuggestions"></datalist>
                 </div>
-                <div class="flex items-center gap-2 py-1">
-                    <input type="checkbox" id="shortcutFavorite" class="w-4 h-4 text-amber-500 rounded border-gray-300">
-                    <label for="shortcutFavorite" class="text-xs font-semibold text-gray-700 cursor-pointer flex items-center gap-1.5"><i class="fa-solid fa-star text-amber-400"></i> Favoritos</label>
+
+                <!-- Checkboxes de Favorito e Dispositivos -->
+                <div class="flex flex-wrap items-center gap-4 py-1.5 border-t border-b border-gray-100 my-1">
+                    <div class="flex items-center gap-1.5">
+                        <input type="checkbox" id="shortcutFavorite" class="w-4 h-4 text-amber-500 rounded border-gray-300 focus:ring-amber-400">
+                        <label for="shortcutFavorite" class="text-xs font-semibold text-gray-700 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-star text-amber-400"></i> Favoritos</label>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <input type="checkbox" id="shortcutDesktop" checked class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <label for="shortcutDesktop" class="text-xs font-semibold text-gray-700 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-desktop text-gray-500"></i> Computador</label>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <input type="checkbox" id="shortcutMobile" checked class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <label for="shortcutMobile" class="text-xs font-semibold text-gray-700 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-mobile-screen-button text-gray-500"></i> Celular</label>
+                    </div>
                 </div>
+
                 <div class="flex items-center justify-end gap-2 mt-2 pt-3 border-t">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
                     <button type="submit" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Adicionar</button>
@@ -310,10 +323,23 @@
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Categoria *</label>
                     <input type="text" id="editShortcutCategory" required list="categorySuggestions" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-                <div class="flex items-center gap-2 py-1">
-                    <input type="checkbox" id="editShortcutFavorite" class="w-4 h-4 text-amber-500 rounded border-gray-300">
-                    <label for="editShortcutFavorite" class="text-xs font-semibold text-gray-700 cursor-pointer flex items-center gap-1.5"><i class="fa-solid fa-star text-amber-400"></i> Favoritos</label>
+
+                <!-- Checkboxes de Favorito e Dispositivos (Editar) -->
+                <div class="flex flex-wrap items-center gap-4 py-1.5 border-t border-b border-gray-100 my-1">
+                    <div class="flex items-center gap-1.5">
+                        <input type="checkbox" id="editShortcutFavorite" class="w-4 h-4 text-amber-500 rounded border-gray-300 focus:ring-amber-400">
+                        <label for="editShortcutFavorite" class="text-xs font-semibold text-gray-700 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-star text-amber-400"></i> Favoritos</label>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <input type="checkbox" id="editShortcutDesktop" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <label for="editShortcutDesktop" class="text-xs font-semibold text-gray-700 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-desktop text-gray-500"></i> Computador</label>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <input type="checkbox" id="editShortcutMobile" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <label for="editShortcutMobile" class="text-xs font-semibold text-gray-700 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-mobile-screen-button text-gray-500"></i> Celular</label>
+                    </div>
                 </div>
+
                 <div class="flex items-center justify-end gap-2 mt-2 pt-3 border-t">
                     <button type="button" onclick="closeEditShortcutModal()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Cancelar</button>
                     <button type="submit" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Salvar</button>
@@ -396,6 +422,11 @@
         let APPS_SCRIPT_URL = '';
         let APPS_SCRIPT_PLANILHA = '';
         const APPS_SCRIPT_URL_PLACEHOLDER = 'SUA_URL_DO_APPS_SCRIPT_AQUI';
+
+        // Detecta se o dispositivo é um navegador de Celular (Android, iPhone, iPad, etc.)
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
 
         function isSyncConfigured() {
             return !!APPS_SCRIPT_URL && APPS_SCRIPT_URL !== APPS_SCRIPT_URL_PLACEHOLDER;
@@ -815,7 +846,15 @@
             if (!categoryList) return;
             categoryList.innerHTML = '';
             
-            const uniqueCategories = new Set(htmlFiles.map(s => (s.category || 'Geral').trim()));
+            // Filtra os atalhos visíveis no dispositivo atual para calcular as contagens
+            const isMob = isMobileDevice();
+            const visibleFiles = htmlFiles.filter(item => {
+                const showDesktop = item.showDesktop !== false;
+                const showMobile = item.showMobile !== false;
+                return isMob ? showMobile : showDesktop;
+            });
+
+            const uniqueCategories = new Set(visibleFiles.map(s => (s.category || 'Geral').trim()));
             const totalCategories = uniqueCategories.size;
 
             const createCatBtn = (label, iconClass, count, catVal, isSystem = true, catIndex = 0) => {
@@ -868,12 +907,12 @@
                 return btn;
             };
 
-            categoryList.appendChild(createCatBtn('Favoritos', 'fa-solid fa-star text-amber-400', htmlFiles.filter(s => !!s.isFavorite).length, 'favorites', true));
-            categoryList.appendChild(createCatBtn('Mais Visitados', 'fa-solid fa-fire text-amber-500', htmlFiles.filter(s => (s.visitCount || 0) > 0).length, 'most_visited', true));
-            categoryList.appendChild(createCatBtn('Todos', 'fa-solid fa-border-all text-blue-600', htmlFiles.length, 'all', true));
+            categoryList.appendChild(createCatBtn('Favoritos', 'fa-solid fa-star text-amber-400', visibleFiles.filter(s => !!s.isFavorite).length, 'favorites', true));
+            categoryList.appendChild(createCatBtn('Mais Visitados', 'fa-solid fa-fire text-amber-500', visibleFiles.filter(s => (s.visitCount || 0) > 0).length, 'most_visited', true));
+            categoryList.appendChild(createCatBtn('Todos', 'fa-solid fa-border-all text-blue-600', visibleFiles.length, 'all', true));
 
             Array.from(uniqueCategories).sort().forEach((cat, index) => {
-                const count = htmlFiles.filter(s => (s.category || 'Geral').trim() === cat).length;
+                const count = visibleFiles.filter(s => (s.category || 'Geral').trim() === cat).length;
                 categoryList.appendChild(createCatBtn(cat, getCategoryIcon(cat), count, cat, false, index));
             });
         }
@@ -1007,13 +1046,22 @@
             updateCategoryHeader();
             updateViewButtonsStyle();
 
-            let filtered = htmlFiles;
+            const isMob = isMobileDevice();
+
+            // 1º FILTRO: Dispositivo Atual (Computador x Celular)
+            let filtered = htmlFiles.filter(item => {
+                const showDesktop = item.showDesktop !== false;
+                const showMobile = item.showMobile !== false;
+                return isMob ? showMobile : showDesktop;
+            });
+
+            // 2º FILTRO: Pesquisa ou Categoria selecionada
             if (searchQuery.length > 0) {
-                filtered = htmlFiles.filter(s => (s.title && s.title.toLowerCase().includes(searchQuery)));
+                filtered = filtered.filter(s => (s.title && s.title.toLowerCase().includes(searchQuery)));
             } else {
-                if (currentCategory === 'favorites') filtered = htmlFiles.filter(s => !!s.isFavorite);
-                else if (currentCategory === 'most_visited') filtered = htmlFiles.filter(s => (s.visitCount || 0) > 0);
-                else if (currentCategory !== 'all') filtered = htmlFiles.filter(s => (s.category || 'Geral').trim().toLowerCase() === currentCategory.trim().toLowerCase());
+                if (currentCategory === 'favorites') filtered = filtered.filter(s => !!s.isFavorite);
+                else if (currentCategory === 'most_visited') filtered = filtered.filter(s => (s.visitCount || 0) > 0);
+                else if (currentCategory !== 'all') filtered = filtered.filter(s => (s.category || 'Geral').trim().toLowerCase() === currentCategory.trim().toLowerCase());
             }
 
             // ORDENAÇÃO: 1º por Visitas (decrescente), 2º por Ordem Alfabética (A-Z)
@@ -1146,6 +1194,9 @@
             const form = document.querySelector('#shortcutModal form');
             if (form) form.reset();
 
+            document.getElementById('shortcutDesktop').checked = true;
+            document.getElementById('shortcutMobile').checked = true;
+
             const systemCategories = ['all', 'favorites', 'most_visited'];
             const categoryWrapper = document.getElementById('shortcutCategoryWrapper');
             if (!systemCategories.includes(currentCategory)) {
@@ -1168,6 +1219,8 @@
             document.getElementById('editFileName').value = item.file || item.name;
             document.getElementById('editShortcutCategory').value = item.category || 'Geral';
             document.getElementById('editShortcutFavorite').checked = !!item.isFavorite;
+            document.getElementById('editShortcutDesktop').checked = item.showDesktop !== false;
+            document.getElementById('editShortcutMobile').checked = item.showMobile !== false;
             document.getElementById('editShortcutModal').classList.remove('hidden');
         }
 
@@ -1183,6 +1236,8 @@
                 item.file = normalizeUrl(document.getElementById('editFileName').value);
                 item.category = document.getElementById('editShortcutCategory').value.trim() || 'Geral';
                 item.isFavorite = document.getElementById('editShortcutFavorite').checked;
+                item.showDesktop = document.getElementById('editShortcutDesktop').checked;
+                item.showMobile = document.getElementById('editShortcutMobile').checked;
                 saveToStorage(true);
             }
             closeEditShortcutModal();
@@ -1211,13 +1266,16 @@
             const file = normalizeUrl(document.getElementById('fileName').value);
             const category = document.getElementById('shortcutCategory').value.trim() || 'Geral';
             const isFav = document.getElementById('shortcutFavorite').checked;
+            const showDesk = document.getElementById('shortcutDesktop').checked;
+            const showMob = document.getElementById('shortcutMobile').checked;
 
             if (!title || !file) return;
 
             htmlFiles.push({
                 id: generateUniqueId(),
                 title, name: title, file, category, customIcon: '',
-                visitCount: 0, isFavorite: isFav
+                visitCount: 0, isFavorite: isFav,
+                showDesktop: showDesk, showMobile: showMob
             });
             saveToStorage(true);
             e.target.reset();
@@ -1278,7 +1336,9 @@
                             id, title, name: title, file: url, category,
                             customIcon: raw.customIcon || '',
                             visitCount: raw.visitCount || 0,
-                            isFavorite: !!raw.isFavorite
+                            isFavorite: !!raw.isFavorite,
+                            showDesktop: raw.showDesktop !== false,
+                            showMobile: raw.showMobile !== false
                         });
                         added++;
                     });
