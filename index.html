@@ -2,6 +2,9 @@
 <html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>azlinks</title>
     <!-- Favicon Moderno -->
@@ -564,9 +567,14 @@
             if (iconMob) iconMob.classList.add('fa-spin');
 
             try {
-                const getUrl = APPS_SCRIPT_PLANILHA
-                    ? APPS_SCRIPT_URL + (APPS_SCRIPT_URL.includes('?') ? '&' : '?') + 'planilha=' + encodeURIComponent(APPS_SCRIPT_PLANILHA)
-                    : APPS_SCRIPT_URL;
+                const timestamp = Date.now();
+                let getUrl = APPS_SCRIPT_URL;
+                if (APPS_SCRIPT_PLANILHA) {
+                    getUrl += (getUrl.includes('?') ? '&' : '?') + 'planilha=' + encodeURIComponent(APPS_SCRIPT_PLANILHA) + '&_t=' + timestamp;
+                } else {
+                    getUrl += (getUrl.includes('?') ? '&' : '?') + '_t=' + timestamp;
+                }
+
                 const res = await fetchWithTimeout(getUrl);
                 const data = await res.json();
                 
