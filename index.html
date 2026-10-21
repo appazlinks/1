@@ -90,6 +90,11 @@
                     <i class="fa-solid fa-plus pointer-events-none"></i> <span class="pointer-events-none">Novo</span>
                 </button>
 
+                <!-- Botão de Ordenação Desktop -->
+                <button type="button" onclick="toggleSortOrder()" title="Ordenar A-Z / Z-A" id="btnSortDesk" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center cursor-pointer">
+                    <i id="sortIconDesk" class="fa-solid fa-arrow-down-a-z pointer-events-none"></i>
+                </button>
+
                 <div class="flex items-center bg-gray-100 border border-gray-200 rounded p-0.5 gap-0.5">
                     <button type="button" onclick="setViewMode('grid')" title="Visualização em Grade" id="btnGridDesk" class="p-1.5 text-xs rounded text-gray-700 hover:bg-white transition-all cursor-pointer">
                         <i class="fa-solid fa-border-all"></i>
@@ -135,6 +140,11 @@
                 <button type="button" onclick="openModal()" class="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium shrink-0 cursor-pointer"><i class="fa-solid fa-plus pointer-events-none"></i> <span class="pointer-events-none">Novo</span></button>
                 
                 <div class="flex items-center gap-1.5 shrink-0">
+                    <!-- Botão de Ordenação Mobile -->
+                    <button type="button" onclick="toggleSortOrder()" title="Ordenar A-Z / Z-A" id="btnSortMob" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center shrink-0 cursor-pointer">
+                        <i id="sortIconMob" class="fa-solid fa-arrow-down-a-z pointer-events-none"></i>
+                    </button>
+
                     <div class="flex items-center bg-gray-100 border border-gray-200 rounded p-0.5 gap-0.5 shrink-0">
                         <button type="button" onclick="setViewMode('grid')" title="Grade" id="btnGridMob" class="p-1.5 text-xs rounded text-gray-700 hover:bg-white transition-all cursor-pointer">
                             <i class="fa-solid fa-border-all"></i>
@@ -481,6 +491,7 @@
         let currentCategory = 'all';
         let searchQuery = '';
         let categoryViewModes = JSON.parse(localStorage.getItem('local_category_view_modes')) || {};
+        let categorySortOrders = JSON.parse(localStorage.getItem('local_category_sort_orders')) || {}; // 'asc' ou 'desc'
         let sidebarOpen = false;
         let itemToDeleteId = null;
         let editingShortcutIconId = null;
@@ -655,6 +666,7 @@
             localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
             localStorage.setItem('local_category_customizations', JSON.stringify(categoryCustomizations));
             localStorage.setItem('local_category_view_modes', JSON.stringify(categoryViewModes));
+            localStorage.setItem('local_category_sort_orders', JSON.stringify(categorySortOrders));
             if (syncNow) {
                 syncToGoogleSheets();
             }
@@ -786,6 +798,27 @@
 
         function getViewMode(cat) {
             return categoryViewModes[cat] || 'grid';
+        }
+
+        function getSortOrder(cat) {
+            return categorySortOrders[cat] || 'asc'; // 'asc' ou 'desc'
+        }
+
+        function toggleSortOrder() {
+            const current = getSortOrder(currentCategory);
+            categorySortOrders[currentCategory] = current === 'asc' ? 'desc' : 'asc';
+            saveToStorage(false);
+            renderGrid();
+        }
+
+        function updateSortButtonStyle() {
+            const order = getSortOrder(currentCategory);
+            const iconDesk = document.getElementById('sortIconDesk');
+            const iconMob = document.getElementById('sortIconMob');
+
+            const iconClass = order === 'asc' ? 'fa-solid fa-arrow-down-a-z' : 'fa-solid fa-arrow-down-z-a';
+            if (iconDesk) iconDesk.className = iconClass + ' pointer-events-none';
+            if (iconMob) iconMob.className = iconClass + ' pointer-events-none';
         }
 
         function updateViewButtonsStyle() {
@@ -1077,9 +1110,12 @@
             const list = document.getElementById('shortcutsList');
             const empty = document.getElementById('emptyState');
             const viewMode = getViewMode(currentCategory);
+            const sortOrder = getSortOrder(currentCategory);
+
             if (!grid) return;
             updateCategoryHeader();
             updateViewButtonsStyle();
+            updateSortButtonStyle();
 
             const isMob = isMobileDevice();
 
@@ -1098,16 +1134,10 @@
             }
 
             filtered.sort((a, b) => {
-                const visitsA = a.visitCount || 0;
-                const visitsB = b.visitCount || 0;
-                
-                if (visitsB !== visitsA) {
-                    return visitsB - visitsA;
-                }
-                
                 const titleA = (a.title || a.name || '').toLowerCase();
                 const titleB = (b.title || b.name || '').toLowerCase();
-                return titleA.localeCompare(titleB);
+                const comparison = titleA.localeCompare(titleB);
+                return sortOrder === 'asc' ? comparison : -comparison;
             });
 
             document.getElementById('currentCategoryCount').textContent = `${filtered.length} itens`;
@@ -1321,7 +1351,8 @@
             const backupPayload = {
                 shortcuts: htmlFiles,
                 categories: categoryCustomizations,
-                viewModes: categoryViewModes
+                viewModes: categoryViewModes,
+                sortOrders: categorySortOrders
             };
             const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -1380,6 +1411,7 @@
                     if (!Array.isArray(imported)) {
                         if (imported.categories && typeof imported.categories === 'object') Object.assign(categoryCustomizations, imported.categories);
                         if (imported.viewModes && typeof imported.viewModes === 'object') Object.assign(categoryViewModes, imported.viewModes);
+                        if (imported.sortOrders && typeof imported.sortOrders === 'object') Object.assign(categorySortOrders, imported.sortOrders);
                     }
 
                     saveToStorage(true);
