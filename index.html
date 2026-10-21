@@ -81,7 +81,7 @@
                 </div>
             </div>
 
-            <!-- Botões Desktop: Todos agrupados à direita, incluindo o botão Novo -->
+            <!-- Botões Desktop -->
             <div class="hidden md:flex items-center justify-end w-full gap-2">
                 <button type="button" onclick="openModal()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-sm font-medium shadow-sm transition-all cursor-pointer">
                     <i class="fa-solid fa-plus pointer-events-none"></i> <span class="pointer-events-none">Novo</span>
@@ -127,7 +127,7 @@
                 </div>
             </div>
 
-            <!-- Botões Mobile: + Novo à esquerda, Demais à direita -->
+            <!-- Botões Mobile -->
             <div class="flex md:hidden items-center justify-between w-full overflow-x-auto pb-1 gap-2">
                 <button type="button" onclick="openModal()" class="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium shrink-0 cursor-pointer"><i class="fa-solid fa-plus pointer-events-none"></i> <span class="pointer-events-none">Novo</span></button>
                 
@@ -423,7 +423,6 @@
         let APPS_SCRIPT_PLANILHA = '';
         const APPS_SCRIPT_URL_PLACEHOLDER = 'SUA_URL_DO_APPS_SCRIPT_AQUI';
 
-        // Detecta se o dispositivo é um navegador de Celular (Android, iPhone, iPad, etc.)
         function isMobileDevice() {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
@@ -575,9 +574,14 @@
                     let changed = false;
                     
                     if (Array.isArray(data.shortcuts)) {
-                        const newShortcutsStr = JSON.stringify(data.shortcuts);
+                        const parsedShortcuts = data.shortcuts.map(s => ({
+                            ...s,
+                            showDesktop: s.showDesktop !== false,
+                            showMobile: s.showMobile !== false
+                        }));
+                        const newShortcutsStr = JSON.stringify(parsedShortcuts);
                         if (newShortcutsStr !== JSON.stringify(htmlFiles)) {
-                            htmlFiles = data.shortcuts;
+                            htmlFiles = parsedShortcuts;
                             localStorage.setItem('local_html_shortcuts', JSON.stringify(htmlFiles));
                             changed = true;
                         }
@@ -846,7 +850,6 @@
             if (!categoryList) return;
             categoryList.innerHTML = '';
             
-            // Filtra os atalhos visíveis no dispositivo atual para calcular as contagens
             const isMob = isMobileDevice();
             const visibleFiles = htmlFiles.filter(item => {
                 const showDesktop = item.showDesktop !== false;
@@ -1048,14 +1051,13 @@
 
             const isMob = isMobileDevice();
 
-            // 1º FILTRO: Dispositivo Atual (Computador x Celular)
+            // Filtro dinâmico com base na preferência salva na nuvem (showDesktop / showMobile)
             let filtered = htmlFiles.filter(item => {
                 const showDesktop = item.showDesktop !== false;
                 const showMobile = item.showMobile !== false;
                 return isMob ? showMobile : showDesktop;
             });
 
-            // 2º FILTRO: Pesquisa ou Categoria selecionada
             if (searchQuery.length > 0) {
                 filtered = filtered.filter(s => (s.title && s.title.toLowerCase().includes(searchQuery)));
             } else {
@@ -1064,7 +1066,6 @@
                 else if (currentCategory !== 'all') filtered = filtered.filter(s => (s.category || 'Geral').trim().toLowerCase() === currentCategory.trim().toLowerCase());
             }
 
-            // ORDENAÇÃO: 1º por Visitas (decrescente), 2º por Ordem Alfabética (A-Z)
             filtered.sort((a, b) => {
                 const visitsA = a.visitCount || 0;
                 const visitsB = b.visitCount || 0;
