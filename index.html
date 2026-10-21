@@ -1425,7 +1425,9 @@
         });
 
         window.onload = async function() {
+            // Renderiza imediatamente o que está salvo localmente para a tela nunca ficar em branco
             render();
+
             const savedEmail = localStorage.getItem('local_user_email');
             const result = savedEmail ? applyUser(savedEmail) : false;
             if (result === true) {
