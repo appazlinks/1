@@ -270,7 +270,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link ou URL *</label>
-                    <input type="text" id="fileName" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="fileName" required autocomplete="off" autocapitalize="none" spellcheck="false" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div id="shortcutCategoryWrapper">
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Categoria *</label>
@@ -317,7 +317,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Link ou URL *</label>
-                    <input type="text" id="editFileName" required class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="editFileName" required autocomplete="off" autocapitalize="none" spellcheck="false" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Categoria *</label>
@@ -432,7 +432,7 @@
         }
 
         function normalizeUrl(value) {
-            const v = String(value || '').trim();
+            const v = String(value || '').trim().replace(/\s+/g, '');
             if (!v) return '';
             return /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v) ? v : 'https://' + v;
         }
@@ -1051,7 +1051,6 @@
 
             const isMob = isMobileDevice();
 
-            // Filtro dinâmico com base na preferência salva (showDesktop / showMobile)
             let filtered = htmlFiles.filter(item => {
                 const showDesktop = item.showDesktop !== false;
                 const showMobile = item.showMobile !== false;
