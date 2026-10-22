@@ -445,7 +445,7 @@
         }
 
         function normalizeUrl(value) {
-            const v = String(value || '').trim().replace(/\s+/g, '');
+            const v = String(value || '').trim();
             if (!v) return '';
             return /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v) ? v : 'https://' + v;
         }
@@ -491,7 +491,7 @@
         let currentCategory = 'all';
         let searchQuery = '';
         let categoryViewModes = JSON.parse(localStorage.getItem('local_category_view_modes')) || {};
-        let categorySortOrders = JSON.parse(localStorage.getItem('local_category_sort_orders')) || {}; // 'asc' ou 'desc'
+        let categorySortOrders = JSON.parse(localStorage.getItem('local_category_sort_orders')) || {};
         let sidebarOpen = false;
         let itemToDeleteId = null;
         let editingShortcutIconId = null;
@@ -801,7 +801,7 @@
         }
 
         function getSortOrder(cat) {
-            return categorySortOrders[cat] || 'asc'; // 'asc' ou 'desc'
+            return categorySortOrders[cat] || 'asc';
         }
 
         function toggleSortOrder() {
@@ -1263,15 +1263,18 @@
 
             const systemCategories = ['all', 'favorites', 'most_visited'];
             const categoryWrapper = document.getElementById('shortcutCategoryWrapper');
+            const categoryInput = document.getElementById('shortcutCategory');
+
             if (!systemCategories.includes(currentCategory)) {
-                document.getElementById('shortcutCategory').value = currentCategory;
+                categoryInput.value = currentCategory;
                 if (categoryWrapper) categoryWrapper.classList.add('hidden');
             } else {
+                categoryInput.value = 'Geral';
                 if (categoryWrapper) categoryWrapper.classList.remove('hidden');
             }
 
             document.getElementById('shortcutModal').classList.remove('hidden');
-            document.getElementById('shortcutTitle').focus();
+            setTimeout(() => document.getElementById('shortcutTitle').focus(), 50);
         }
         function closeModal() { document.getElementById('shortcutModal').classList.add('hidden'); }
 
@@ -1328,7 +1331,17 @@
             e.preventDefault();
             const title = document.getElementById('shortcutTitle').value.trim();
             const file = normalizeUrl(document.getElementById('fileName').value);
-            const category = document.getElementById('shortcutCategory').value.trim() || 'Geral';
+            
+            // Corrige a captura da categoria em dispositivos móveis caso o campo esteja oculto
+            let category = 'Geral';
+            const systemCategories = ['all', 'favorites', 'most_visited'];
+            if (!systemCategories.includes(currentCategory)) {
+                category = currentCategory;
+            } else {
+                const catInput = document.getElementById('shortcutCategory');
+                category = (catInput && catInput.value.trim()) ? catInput.value.trim() : 'Geral';
+            }
+
             const isFav = document.getElementById('shortcutFavorite').checked;
             const showDesk = document.getElementById('shortcutDesktop').checked;
             const showMob = document.getElementById('shortcutMobile').checked;
