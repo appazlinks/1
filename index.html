@@ -943,7 +943,7 @@
                             <button type="button" onclick="toggleActionMenu(event, '${catMenuId}')" title="Ações" class="sidebar-text md:hidden p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors cursor-pointer">
                                 <i class="fa-solid fa-ellipsis-vertical text-xs pointer-events-none"></i>
                             </button>
-                            <div id="${catMenuId}" class="action-menu-dropdown ${catMenuPositionClass} w-36 bg-white border border-gray-200 rounded-md shadow-xl hidden z-50 py-1 text-left">
+                            <div id="${catMenuId}" class="action-menu-dropdown ${catMenuPositionClass} w-36 bg-white border border-gray-200 rounded-md shadow-xl hidden z-[60] py-1 text-left">
                                 <button type="button" onclick="event.stopPropagation(); openEditCategoryModal('${catVal.replace(/'/g, "\\'")}'); closeAllActionMenus();" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 flex items-center gap-2 cursor-pointer">
                                     <i class="fa-solid fa-pen text-blue-500 pointer-events-none"></i> Editar
                                 </button>
@@ -1162,7 +1162,7 @@
                     const isFav = !!item.isFavorite;
 
                     return `
-                        <div class="group relative flex flex-col items-center justify-between p-3 py-3 min-h-[100px] h-full rounded-lg cursor-pointer text-center bg-white border border-gray-200/80 hover:border-blue-300 hover:shadow-sm"
+                        <div class="group relative flex flex-col items-center justify-between p-3 py-3 min-h-[100px] h-full rounded-lg cursor-pointer text-center bg-white border border-gray-200/80 hover:border-blue-300 hover:shadow-sm overflow-visible"
                              onclick="openShortcut('${targetUrl}', '${item.id}')">
                             
                             <button type="button" onclick="toggleFavorite(event, '${item.id}')" class="absolute top-1 left-1 p-1 text-gray-300 hover:text-amber-400 z-10 cursor-pointer">
@@ -1174,11 +1174,11 @@
                             </div>
                             <span class="text-xs text-gray-700 line-clamp-2 w-full font-medium pointer-events-none mt-1 leading-tight">${item.title || item.name}</span>
                             
-                            <div class="absolute top-1 right-1 action-menu-container z-10">
+                            <div class="absolute top-1 right-1 action-menu-container z-20">
                                 <button type="button" onclick="toggleActionMenu(event, '${menuId}')" title="Ações" class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors cursor-pointer">
                                     <i class="fa-solid fa-ellipsis-vertical text-xs pointer-events-none"></i>
                                 </button>
-                                <div id="${menuId}" class="action-menu-dropdown absolute top-full right-0 w-36 bg-white border rounded shadow-lg hidden z-50 py-1 text-left text-xs">
+                                <div id="${menuId}" class="action-menu-dropdown absolute top-full right-0 w-36 bg-white border rounded shadow-lg hidden z-[60] py-1 text-left text-xs">
                                     <button type="button" onclick="event.stopPropagation(); shareShortcut('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700 cursor-pointer"><i class="fa-solid fa-share-nodes text-emerald-600 pointer-events-none"></i> Compartilhar</button>
                                     <button type="button" onclick="event.stopPropagation(); openEditShortcutModal('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700 cursor-pointer"><i class="fa-solid fa-pen text-blue-500 pointer-events-none"></i> Editar</button>
                                     <button type="button" onclick="event.stopPropagation(); triggerShortcutIconChange('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700 cursor-pointer"><i class="fa-solid fa-image text-gray-400 pointer-events-none"></i> Alterar Ícone</button>
@@ -1214,11 +1214,11 @@
                                     <p class="text-[10px] text-gray-400 truncate pointer-events-none">${targetUrl}</p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2 shrink-0 action-menu-container">
+                            <div class="flex items-center gap-2 shrink-0 action-menu-container z-20">
                                 <button type="button" onclick="toggleActionMenu(event, '${menuId}')" title="Ações" class="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors cursor-pointer">
                                     <i class="fa-solid fa-ellipsis-vertical text-xs pointer-events-none"></i>
                                 </button>
-                                <div id="${menuId}" class="action-menu-dropdown ${menuPositionClass} w-36 bg-white border rounded shadow-lg hidden z-50 py-1 text-left text-xs">
+                                <div id="${menuId}" class="action-menu-dropdown ${menuPositionClass} w-36 bg-white border rounded shadow-lg hidden z-[60] py-1 text-left text-xs">
                                     <button type="button" onclick="event.stopPropagation(); shareShortcut('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700 cursor-pointer"><i class="fa-solid fa-share-nodes text-emerald-600 pointer-events-none"></i> Compartilhar</button>
                                     <button type="button" onclick="event.stopPropagation(); openEditShortcutModal('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700 cursor-pointer"><i class="fa-solid fa-pen text-blue-500 pointer-events-none"></i> Editar</button>
                                     <button type="button" onclick="event.stopPropagation(); triggerShortcutIconChange('${item.id}'); closeAllActionMenus();" class="w-full px-3 py-1.5 hover:bg-gray-100 flex items-center gap-2 text-gray-700 cursor-pointer"><i class="fa-solid fa-image text-gray-400 pointer-events-none"></i> Alterar Ícone</button>
