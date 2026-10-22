@@ -90,6 +90,18 @@
                     <i class="fa-solid fa-plus pointer-events-none"></i> <span class="pointer-events-none">Novo</span>
                 </button>
 
+                <!-- Botão Mais Opções (Três Pontinhos) Desktop -->
+                <div class="relative dropdown-container">
+                    <button type="button" id="btnMoreDesk" title="Mais opções" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-ellipsis-vertical pointer-events-none"></i>
+                    </button>
+                    <div id="moreDropdownDesk" class="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1 text-xs">
+                        <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-download text-gray-400"></i> Exportar</button>
+                        <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-upload text-gray-400"></i> Importar</button>
+                        <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-red-600 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-trash text-red-500"></i> Remover Todos</button>
+                    </div>
+                </div>
+
                 <!-- Botão de Ordenação Desktop -->
                 <button type="button" onclick="toggleSortOrder()" title="Ordenar A-Z / Z-A" id="btnSortDesk" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center cursor-pointer">
                     <i id="sortIconDesk" class="fa-solid fa-arrow-down-a-z pointer-events-none"></i>
@@ -107,17 +119,6 @@
                 <button type="button" onclick="syncFromGoogleSheets()" title="Forçar sincronização" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:text-blue-600 transition-all flex items-center justify-center cursor-pointer">
                     <i id="syncIconDesk" class="fa-solid fa-rotate-right pointer-events-none"></i>
                 </button>
-
-                <div class="relative dropdown-container">
-                    <button type="button" id="btnMoreDesk" title="Mais opções" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center cursor-pointer">
-                        <i class="fa-solid fa-ellipsis-vertical pointer-events-none"></i>
-                    </button>
-                    <div id="moreDropdownDesk" class="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1 text-xs">
-                        <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-download text-gray-400"></i> Exportar</button>
-                        <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-upload text-gray-400"></i> Importar</button>
-                        <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-red-600 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-trash text-red-500"></i> Remover Todos</button>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -140,6 +141,18 @@
                 <button type="button" onclick="openModal()" class="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-md text-xs font-medium shrink-0 cursor-pointer"><i class="fa-solid fa-plus pointer-events-none"></i> <span class="pointer-events-none">Novo</span></button>
                 
                 <div class="flex items-center gap-1.5 shrink-0">
+                    <!-- Botão Mais Opções (Três Pontinhos) Mobile -->
+                    <div class="relative dropdown-container shrink-0">
+                        <button type="button" id="btnMoreMob" title="Mais opções" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:text-blue-600 transition-all flex items-center justify-center cursor-pointer">
+                            <i class="fa-solid fa-ellipsis-vertical pointer-events-none"></i>
+                        </button>
+                        <div id="moreDropdownMob" class="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1 text-xs">
+                            <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-download text-gray-400"></i> Exportar</button>
+                            <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-upload text-gray-400"></i> Importar</button>
+                            <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-red-600 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-trash text-red-500"></i> Remover Todos</button>
+                        </div>
+                    </div>
+
                     <!-- Botão de Ordenação Mobile -->
                     <button type="button" onclick="toggleSortOrder()" title="Ordenar A-Z / Z-A" id="btnSortMob" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center shrink-0 cursor-pointer">
                         <i id="sortIconMob" class="fa-solid fa-arrow-down-a-z pointer-events-none"></i>
@@ -157,17 +170,6 @@
                     <button type="button" onclick="syncFromGoogleSheets()" title="Forçar sincronização" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:text-blue-600 transition-all flex items-center justify-center shrink-0 cursor-pointer">
                         <i id="syncIconMob" class="fa-solid fa-rotate-right pointer-events-none"></i>
                     </button>
-
-                    <div class="relative dropdown-container shrink-0">
-                        <button type="button" id="btnMoreMob" title="Mais opções" class="p-2 text-xs rounded bg-gray-100 border border-gray-200 text-gray-700 hover:text-blue-600 transition-all flex items-center justify-center cursor-pointer">
-                            <i class="fa-solid fa-ellipsis-vertical pointer-events-none"></i>
-                        </button>
-                        <div id="moreDropdownMob" class="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-md shadow-lg hidden z-30 py-1 text-xs">
-                            <button onclick="exportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-download text-gray-400"></i> Exportar</button>
-                            <button onclick="triggerImportBackup(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-upload text-gray-400"></i> Importar</button>
-                            <button onclick="confirmClearAllShortcuts(); closeAllDropdowns();" class="w-full text-left px-3 py-1.5 text-red-600 hover:bg-gray-100 flex items-center gap-2"><i class="fa-solid fa-trash text-red-500"></i> Remover Todos</button>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1532,7 +1534,6 @@
 
             const expectedPass = getExpectedPassword();
             if (password !== expectedPass) {
-                // Mensagem de erro atualizada para exibir apenas "Senha incorreta."
                 error.textContent = 'Senha incorreta.';
                 error.classList.remove('hidden');
                 return;
