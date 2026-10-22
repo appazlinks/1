@@ -1532,7 +1532,8 @@
 
             const expectedPass = getExpectedPassword();
             if (password !== expectedPass) {
-                error.textContent = 'Senha incorreta. A senha deve ser a data atual (AAAAMMDD).';
+                // Mensagem de erro atualizada para exibir apenas "Senha incorreta."
+                error.textContent = 'Senha incorreta.';
                 error.classList.remove('hidden');
                 return;
             }
